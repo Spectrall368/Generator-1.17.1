@@ -1,0 +1,10 @@
+{
+  "id": "generator-1.17.1",
+  "minversion": 202100300000,
+  "maxversion": 202200100000,
+  "info": {
+    "name": "Minecraft 1.17.1 Java Edition generator",
+    "version": "1.0",
+    "authors": "_Spectrall"
+  }
+}
