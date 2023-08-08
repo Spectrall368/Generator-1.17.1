@@ -39,7 +39,7 @@ public class ${name}Feature extends OreFeature {
 	public static final ${name}Feature FEATURE = (${name}Feature) new ${name}Feature().setRegistryName("${modid}:${registryname}");
 	public static final ConfiguredFeature<?, ?> CONFIGURED_FEATURE = FEATURE
 				.configured(new OreConfiguration(${name}FeatureRuleTest.INSTANCE, ${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.defaultBlockState(), ${data.frequencyOnChunk}))
-				.range(new RangeDecoratorConfiguration(UniformHeight.of(VerticalAnchor.absolute(${data.minGenerateHeight}), VerticalAnchor.absolute(<#if data.maxGenerateHeight gt 256>256<#elseif data.maxGenerateHeight lt 0>0<#else>${data.maxGenerateHeight}</#if>))))
+				.range(new RangeDecoratorConfiguration(UniformHeight.of(VerticalAnchor.absolute(<#if data.minGenerateHeight gt 256>256<#elseif data.minGenerateHeight lt 0>0<#else>${data.minGenerateHeight}</#if>), VerticalAnchor.absolute(<#if data.maxGenerateHeight gt 256>256<#elseif data.maxGenerateHeight lt 0>0<#else>${data.maxGenerateHeight}</#if>))))
 				.squared().count(${data.frequencyPerChunks});
 
 	public static final Set<ResourceLocation> GENERATE_BIOMES =
