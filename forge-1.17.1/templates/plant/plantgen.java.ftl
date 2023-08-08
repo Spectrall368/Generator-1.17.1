@@ -48,22 +48,22 @@ public class ${name}Feature extends <#if data.plantType == "normal" && data.stat
 						</#if>
 					)
 					.tries(${data.patchSize})
-					.count(${data.frequencyOnChunks});
 					<#if data.plantType == "growapable">.xspread(4).yspread(0).zspread(4).noProjection()</#if>
 					<#if data.plantType == "double" && data.doublePlantGenerationType == "Flower">.noProjection()</#if>
 					.build()
 				)
-			.decorated(FeatureDecorator.HEIGHTMAP<#if (data.plantType == "normal" && data.staticPlantGenerationType == "Grass") || data.plantType == "growapable">_SPREAD_DOUBLE</#if>.configured(new HeightmapConfiguration(Heightmap.Types.MOTION_BLOCKING)))
-			.squared()
-			<#if data.generateAtAnyHeight>
-				public static final RangeDecoratorConfiguration FULL_RANGE = new RangeDecoratorConfiguration(UniformHeight.of(VerticalAnchor.bottom(), VerticalAnchor.top()));
-			<#else>
+				.decorated(FeatureDecorator.HEIGHTMAP<#if (data.plantType == "normal" && data.staticPlantGenerationType == "Grass") || data.plantType == "growapable">_SPREAD_DOUBLE</#if>.configured(new HeightmapConfiguration(Heightmap.Types.MOTION_BLOCKING)))
+				.squared()
+				<#if data.generateAtAnyHeight>
+public static final RangeDecoratorConfiguration FULL_RANGE = new RangeDecoratorConfiguration(UniformHeight.of(VerticalAnchor.bottom(), VerticalAnchor.top()));
+				<#else>
+				.count(${data.frequencyOnChunks});
 				<#if (data.plantType == "normal" && data.staticPlantGenerationType == "Flower") ||
 					 (data.plantType == "double" && data.doublePlantGenerationType == "Flower") ||
 					  data.plantType == "growapable">
 					.rarity(32)
 				</#if>
-			</#if>
+				</#if>
 
 	public static final Set<ResourceLocation> GENERATE_BIOMES =
 	<#if data.restrictionBiomes?has_content>
