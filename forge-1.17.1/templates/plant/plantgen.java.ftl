@@ -55,11 +55,15 @@ public class ${name}Feature extends <#if data.plantType == "normal" && data.stat
 				)
 			.decorated(FeatureDecorator.HEIGHTMAP<#if (data.plantType == "normal" && data.staticPlantGenerationType == "Grass") || data.plantType == "growapable">_SPREAD_DOUBLE</#if>.configured(new HeightmapConfiguration(Heightmap.Types.MOTION_BLOCKING)))
 			.squared()
+			<#if data.generateAtAnyHeight>
+				public static final RangeDecoratorConfiguration FULL_RANGE = new RangeDecoratorConfiguration(UniformHeight.of(VerticalAnchor.bottom(), VerticalAnchor.top()));
+			<#else>
 				<#if (data.plantType == "normal" && data.staticPlantGenerationType == "Flower") ||
 					 (data.plantType == "double" && data.doublePlantGenerationType == "Flower") ||
 					  data.plantType == "growapable">
 					.rarity(32)
 				</#if>
+			</#if>
 			 BiomeFilter.biome()
 
 	public static final Set<ResourceLocation> GENERATE_BIOMES =
