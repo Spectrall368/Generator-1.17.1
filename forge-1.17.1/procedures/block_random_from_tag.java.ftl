@@ -1,2 +1,6 @@
 <#include "mcelements.ftl">
-(ForgeRegistries.BLOCKS.tags().getTag(BlockTags.create(${toResourceLocation(input$tag)})).getRandomElement(new Random()).orElseGet(() -> Blocks.AIR))
+(new Object() {
+	public Block getRandomBlock(ResourceLocation name) {
+		ITag<Block> _tag = BlockTags.getCollection().getTagByID(name);
+		return _tag.getAllElements().isEmpty() ? Blocks.AIR : _tag.getRandomElement(new Random());
+}}.getRandomBlock(${toResourceLocation(input$tag)}))
