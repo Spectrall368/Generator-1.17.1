@@ -64,7 +64,6 @@ public class ${name}Feature extends <#if data.plantType == "normal" && data.stat
 					.rarity(32)
 				</#if>
 			</#if>
-			 BiomeFilter.biome()
 
 	public static final Set<ResourceLocation> GENERATE_BIOMES =
 	<#if data.restrictionBiomes?has_content>
