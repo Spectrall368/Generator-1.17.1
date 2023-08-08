@@ -351,7 +351,7 @@ public class ${name}Block extends
 		return true;
 	}
 
-	@Override public int getSignal(BlockState blockstate, BlockGetter blockAccess, BlockPos pos, Direction side) {
+	@Override public int getSignal(BlockState blockstate, BlockGetter blockAccess, BlockPos pos, Direction direction) {
 		<#if hasProcedure(data.emittedRedstonePower)>
 			int x = pos.getX();
 			int y = pos.getY();
