@@ -37,6 +37,7 @@
 package ${package}.init;
 
 <#assign hasBlocks = false>
+<#assign hasDoubleBlocks = false>
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD) public class ${JavaModName}Items {
 
@@ -61,8 +62,15 @@ package ${package}.init;
         <#elseif item.getModElement().getTypeString() == "fluid" && item.generateBucket>
             public static final Item ${item.getModElement().getRegistryNameUpper()}_BUCKET = register(new ${item.getModElement().getName()}Item());
         <#elseif item.getModElement().getType().getBaseType()?string == "BLOCK">
-            <#assign hasBlocks = true>
-            public static final Item ${item.getModElement().getRegistryNameUpper()} = register(${JavaModName}Blocks.${item.getModElement().getRegistryNameUpper()}, ${item.creativeTab});
+            <#if (item.getModElement().getTypeString() == "block" && item.isDoubleBlock()) || (item.getModElement().getTypeString() == "plant" && item.isDoubleBlock())>
+                <#assign hasDoubleBlocks = true>
+                public static final Item ${item.getModElement().getRegistryNameUpper()} = 
+                    register(${JavaModName}Blocks.${item.getModElement().getRegistryNameUpper()}, ${item.creativeTab});
+            <#else>
+                <#assign hasBlocks = true>
+                public static final Item ${item.getModElement().getRegistryNameUpper()} = 
+                    register(${JavaModName}Blocks.${item.getModElement().getRegistryNameUpper()}, ${item.creativeTab});
+            </#if>
         <#elseif item.getModElement().getTypeString() == "livingentity">
             public static final Item ${item.getModElement().getRegistryNameUpper()} = register(new SpawnEggItem(${JavaModName}Entities.${item.getModElement().getRegistryNameUpper()},
                     ${item.spawnEggBaseColor.getRGB()}, ${item.spawnEggDotColor.getRGB()}, new Item.Properties() <#if item.creativeTab??>.tab(${item.creativeTab})<#else>
@@ -77,7 +85,7 @@ package ${package}.init;
     	return item;
     }
 
-    <#if hasBlocks>
+    <#if hasBlocks || hasDoubleBlocks>
 	private static Item register(Block block, CreativeModeTab tab) {
 		return register(new BlockItem(block, new Item.Properties().tab(tab)).setRegistryName(block.getRegistryName()));
 	}
