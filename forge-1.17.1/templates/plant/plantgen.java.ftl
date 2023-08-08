@@ -48,18 +48,19 @@ public class ${name}Feature extends <#if data.plantType == "normal" && data.stat
 						</#if>
 					)
 					.tries(${data.patchSize})
+					.count(${data.frequencyOnChunks});
 					<#if data.plantType == "growapable">.xspread(4).yspread(0).zspread(4).noProjection()</#if>
 					<#if data.plantType == "double" && data.doublePlantGenerationType == "Flower">.noProjection()</#if>
 					.build()
 				)
-				.decorated(FeatureDecorator.HEIGHTMAP<#if (data.plantType == "normal" && data.staticPlantGenerationType == "Grass") || data.plantType == "growapable">_SPREAD_DOUBLE</#if>.configured(new HeightmapConfiguration(Heightmap.Types.MOTION_BLOCKING)))
-				.squared()
+			.decorated(FeatureDecorator.HEIGHTMAP<#if (data.plantType == "normal" && data.staticPlantGenerationType == "Grass") || data.plantType == "growapable">_SPREAD_DOUBLE</#if>.configured(new HeightmapConfiguration(Heightmap.Types.MOTION_BLOCKING)))
+			.squared()
 				<#if (data.plantType == "normal" && data.staticPlantGenerationType == "Flower") ||
 					 (data.plantType == "double" && data.doublePlantGenerationType == "Flower") ||
 					  data.plantType == "growapable">
 					.rarity(32)
 				</#if>
-				.count(${data.frequencyOnChunks});
+			 BiomeFilter.biome()
 
 	public static final Set<ResourceLocation> GENERATE_BIOMES =
 	<#if data.restrictionBiomes?has_content>
