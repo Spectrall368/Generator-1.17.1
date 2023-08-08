@@ -28,6 +28,7 @@
 -->
 
 <#-- @formatter:off -->
+<#include "../procedures.java.ftl">
 package ${package}.client.renderer;
 
 <#assign humanoid = false>
@@ -93,5 +94,29 @@ public class ${name}Renderer extends <#if humanoid>Humanoid</#if>MobRenderer<${n
 	@Override public ResourceLocation getTextureLocation(${name}Entity entity) {
 		return new ResourceLocation("${modid}:textures/${data.mobModelTexture}"); 
 	}
+
+    <#if hasProcedure(data.transparentModelCondition)>
+        @Override
+	    protected boolean isBodyVisible(${name}Entity _ent) {
+	        Entity entity = _ent;
+	        Level world = entity.level;
+	        double x = entity.getX();
+	        double y = entity.getY();
+	        double z = entity.getZ();
+		    return !<@procedureOBJToConditionCode data.transparentModelCondition/>;
+	    }
+	</#if>
+
+    <#if hasProcedure(data.isShakingCondition)>
+        @Override
+	    protected boolean isShaking(${name}Entity _ent) {
+	        Entity entity = _ent;
+	        Level world = entity.level;
+	        double x = entity.getX();
+	        double y = entity.getY();
+	        double z = entity.getZ();
+		    return <@procedureOBJToConditionCode data.isShakingCondition/>;
+	    }
+	</#if>
 
 }
