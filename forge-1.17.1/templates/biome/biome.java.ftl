@@ -400,8 +400,19 @@ public class ${name}Biome {
         </#if>
 
         <#if data.spawnBiome>
-            BiomeManager.addBiome(BiomeManager.BiomeType.${data.biomeType},
-                new BiomeManager.BiomeEntry(ResourceKey.create(Registry.BIOME_REGISTRY, BuiltinRegistries.BIOME.getKey(${JavaModName}Biomes.${registryname?upper_case})), ${data.biomeWeight}));
+            BiomeManager.addBiome(
+				BiomeManager.BiomeType.
+				<#if (data.temperature < -0.25)>
+					ICY
+				<#elseif (data.temperature > -0.25) && (data.temperature <= 0.15)>
+					COOL
+				<#elseif (data.temperature > 0.15) && (data.temperature <= 1.0)>
+					WARM
+				<#elseif (data.temperature > 1.0)>
+					DESERT
+				</#if>,
+				new BiomeManager.BiomeEntry(ResourceKey.create(Registry.BIOME_REGISTRY, BuiltinRegistries.BIOME.getKey(${JavaModName}Biomes.${registryname?upper_case})), ${data.biomeWeight})
+			);
         </#if>
     }
 
