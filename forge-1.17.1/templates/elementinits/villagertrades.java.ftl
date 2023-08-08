@@ -49,7 +49,7 @@ import net.minecraft.world.entity.npc.VillagerTrades;
                 if (event.getType() == ${tradeEntry.villagerProfession}) {
                 <#list tradeEntry.entries as entry>
                     trades.get(${entry.level}).add(
-					    new BasicItemListing(
+					    new RandomTradeBuilder(
                             ${mappedMCItemToItemStackCode(entry.price1, entry.countPrice1)},
                             <#if !entry.price2.isEmpty()>${mappedMCItemToItemStackCode(entry.price2, entry.countPrice2)},</#if>
                             ${mappedMCItemToItemStackCode(entry.offer, entry.countOffer)},
