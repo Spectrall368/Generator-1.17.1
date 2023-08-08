@@ -1,12 +1,12 @@
+<#include "mcelements.ftl">
 <#-- @formatter:off -->
 {
-	BlockEntity _ent = world.getBlockEntity(new BlockPos((int)${input$x},(int)${input$y},(int)${input$z}));
+	BlockEntity _ent = world.getBlockEntity(${toBlockPos(input$x,input$y,input$z)});
 	if (_ent != null) {
-		final int _sltid = ${opt.toInt(input$slotid)};
+		final int _slotid = ${opt.toInt(input$slotid)};
 		_ent.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(capability -> {
-			if (capability instanceof IItemHandlerModifiable) {
-				((IItemHandlerModifiable) capability).setStackInSlot(_sltid, ItemStack.EMPTY);
-			}
+			if (capability instanceof IItemHandlerModifiable)
+				((IItemHandlerModifiable) capability).setStackInSlot(_slotid, ItemStack.EMPTY);
 		});
 	}
 }
