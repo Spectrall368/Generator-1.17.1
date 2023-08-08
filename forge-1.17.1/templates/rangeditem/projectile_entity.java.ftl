@@ -60,7 +60,7 @@ public class ${name}Entity extends AbstractArrow implements ItemSupplier {
 		<#if !data.bulletItemTexture.isEmpty()>
 		return ${mappedMCItemToItemStackCode(data.bulletItemTexture, 1)};
     	<#else>
-		return null;
+		return ItemStack.EMPTY;
     	</#if>
 	}
 
@@ -68,7 +68,7 @@ public class ${name}Entity extends AbstractArrow implements ItemSupplier {
 		<#if !data.ammoItem.isEmpty()>
 		return ${mappedMCItemToItemStackCode(data.ammoItem, 1)};
     	<#else>
-		return null;
+		return ItemStack.EMPTY;
     	</#if>
 	}
 
