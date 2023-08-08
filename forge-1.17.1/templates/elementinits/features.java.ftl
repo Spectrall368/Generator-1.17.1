@@ -41,7 +41,7 @@ package ${package}.init;
 	private static final Map<Feature<?>, FeatureRegistration> REGISTRY = new HashMap<>();
 
 	static {
-    <#list features as feature>
+	<#list features as feature>
 		<#if feature.getModElement().getTypeString() == "block">
 			REGISTRY.put(${feature.getModElement().getName()}Feature.FEATURE, new FeatureRegistration(GenerationStep.Decoration.UNDERGROUND_ORES,
 						${feature.getModElement().getName()}Feature.GENERATE_BIOMES, ${feature.getModElement().getName()}Feature.CONFIGURED_FEATURE));
@@ -56,10 +56,10 @@ package ${package}.init;
 						<#if feature.spawnLocation=="Air">RAW_GENERATION<#elseif feature.spawnLocation=="Underground">UNDERGROUND_STRUCTURES<#else>SURFACE_STRUCTURES</#if>,
 						${feature.getModElement().getName()}Feature.GENERATE_BIOMES, ${feature.getModElement().getName()}Feature.CONFIGURED_FEATURE));
 		</#if>
-    </#list>
+	</#list>
 	}
 
-	@SubscribeEvent public static void registerFeature(RegistryEvent.Register<Feature<?>> event) {
+	@SubscribeEvent public static void registerFeatures(RegistryEvent.Register<Feature<?>> event) {
 		event.getRegistry().registerAll(REGISTRY.keySet().toArray(new Feature[0]));
 
 		REGISTRY.forEach((feature, registration) -> {
@@ -69,7 +69,7 @@ package ${package}.init;
 
 	@Mod.EventBusSubscriber private static class BiomeFeatureLoader {
 
-		@SubscribeEvent public static void addFeatureToBiomes(BiomeLoadingEvent event) {
+		@SubscribeEvent public static void addFeaturesToBiomes(BiomeLoadingEvent event) {
 			for (FeatureRegistration registration : REGISTRY.values())
 				if (registration.biomes() == null || registration.biomes().contains(event.getName())) {
 					event.getGeneration().getFeatures(registration.stage()).add(() -> registration.configuredFeature());
