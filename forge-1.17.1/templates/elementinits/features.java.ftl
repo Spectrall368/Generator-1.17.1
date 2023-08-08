@@ -63,7 +63,7 @@ package ${package}.init;
 		event.getRegistry().registerAll(REGISTRY.keySet().toArray(new Feature[0]));
 
 		REGISTRY.forEach((feature, registration) -> {
-			Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, feature.getRegistryName(), registration.configuredFeature()));
+			Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, feature.getRegistryName(), registration.configuredFeature());
 		});
 	}
 
