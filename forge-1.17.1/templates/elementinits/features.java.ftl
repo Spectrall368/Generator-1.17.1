@@ -62,16 +62,17 @@ package ${package}.init;
 	@SubscribeEvent public static void registerFeature(RegistryEvent.Register<Feature<?>> event) {
 		event.getRegistry().registerAll(REGISTRY.keySet().toArray(new Feature[0]));
 
-		REGISTRY.forEach((feature, registration) -> Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, feature.getRegistryName(), registration.configuredFeature()));
+		REGISTRY.forEach((feature, registration) -> {
+			Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, feature.getRegistryName(), registration.configuredFeature()));
+		});
 	}
 
 	@Mod.EventBusSubscriber private static class BiomeFeatureLoader {
 
 		@SubscribeEvent public static void addFeatureToBiomes(BiomeLoadingEvent event) {
-			for (FeatureRegistration registration : REGISTRY.values()) {
+			for (FeatureRegistration registration : REGISTRY.values())
 				if (registration.biomes() == null || registration.biomes().contains(event.getName())) {
 					event.getGeneration().getFeatures(registration.stage()).add(() -> registration.configuredFeature());
-				}
 			}
 		}
 
