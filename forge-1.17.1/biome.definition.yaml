@@ -23,4 +23,4 @@ localizationkeys:
   - key: biome.@modid.@registryname
     mapto: name
 
-field_exclusions: [spawnBiomeNether]
+field_exclusions: [spawnBiomeNether, spawnInCaves]
