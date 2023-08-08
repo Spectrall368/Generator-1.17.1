@@ -50,17 +50,21 @@ public class ${name}Feature extends Feature<NoneFeatureConfiguration> {
 	</#if>
 
 	<#if data.restrictionBlocks?has_content>
-	private final List<Block> base_blocks = List.of(
-		<#list data.restrictionBlocks as restrictionBlock>
-			${mappedBlockToBlock(restrictionBlock)}<#if restrictionBlock?has_next>,</#if>
-		</#list>
-	);
+	private final List<Block> base_blocks;
 	</#if>
 
 	private StructureTemplate template = null;
 
 	public ${name}Feature() {
 		super(NoneFeatureConfiguration.CODEC);
+
+		<#if data.restrictionBlocks?has_content>
+			base_blocks = List.of(
+				<#list data.restrictionBlocks as restrictionBlock>
+					${mappedBlockToBlock(restrictionBlock)}<#sep>,
+				</#list>
+			);
+		</#if>
 	}
 
 	@Override public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
