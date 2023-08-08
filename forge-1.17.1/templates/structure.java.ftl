@@ -108,7 +108,7 @@ public class ${name}Feature extends Feature<NoneFeatureConfiguration> {
 						Heightmap.Types.<#if data.surfaceDetectionType == "First block">WORLD_SURFACE_WG<#else>OCEAN_FLOOR_WG</#if>, i, k
 					)<#if data.spawnLocation == "Ground"> - 1</#if>;
 
-				<#elseif data.spawnLocation=="Air">
+				<#if data.spawnLocation == "Air">
 					j += context.random().nextInt(64) + 16;
 				<#elseif data.spawnLocation=="Underground">
 					j = Mth.nextInt(context.random(), 8 + context.level().getMinBuildHeight(), Math.max(j, 9 + context.level().getMinBuildHeight()));
