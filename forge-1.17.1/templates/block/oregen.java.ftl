@@ -96,13 +96,17 @@ public class ${name}Feature extends OreFeature {
 		static final RuleTestType<${name}FeatureRuleTest> CUSTOM_MATCH = Registry.register(Registry.RULE_TEST,
 				new ResourceLocation("${modid}:${registryname}_match"), () -> codec);
 
-		private final List<Block> base_blocks = List.of(
-			<#list data.blocksToReplace as replacementBlock>
-				${mappedBlockToBlock(replacementBlock)}<#sep>,
-			</#list>
-		);
+		private List<Block> base_blocks = null;
 
 		public boolean test(BlockState blockAt, Random random) {
+			if (base_blocks == null) {
+				base_blocks = List.of(
+					<#list data.blocksToReplace as replacementBlock>
+						${mappedBlockToBlock(replacementBlock)}<#sep>,
+					</#list>
+				);
+			}
+
 			return base_blocks.contains(blockAt.getBlock());
 		}
 
