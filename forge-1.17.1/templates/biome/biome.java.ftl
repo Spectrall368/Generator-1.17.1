@@ -43,7 +43,7 @@ public class ${name}Biome {
 	private static final ConfiguredSurfaceBuilder<?> SURFACE_BUILDER = SurfaceBuilder.DEFAULT.configured(new SurfaceBuilderBaseConfiguration(
             ${mappedBlockToBlockStateCode(data.groundBlock)},
             ${mappedBlockToBlockStateCode(data.undergroundBlock)},
-            ${mappedBlockToBlockStateCode(data.undergroundBlock)}));
+            ${mappedBlockToBlockStateCode(data.getUnderwaterBlock())}));
 
     public static Biome createBiome() {
             BiomeSpecialEffects effects = new BiomeSpecialEffects.Builder()
