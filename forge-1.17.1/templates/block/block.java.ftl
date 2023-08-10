@@ -99,7 +99,7 @@ public class ${name}Block extends
 		<#if data.luminance != 0>
 			.lightLevel(s -> ${data.luminance})
 		</#if>
-		<#if data.destroyTool != "Not specified">
+		<#if data.requiresCorrectTool>
 			.requiresCorrectToolForDrops()
 		</#if>
 		<#if data.isNotColidable>
@@ -433,7 +433,7 @@ public class ${name}Block extends
 	}
 	</#if>
 
-	<#if data.destroyTool != "Not specified">
+	<#if data.requiresCorrectTool>
 	@Override public boolean canHarvestBlock(BlockState state, BlockGetter world, BlockPos pos, Player player) {
 		if(player.getInventory().getSelected().getItem() instanceof TieredItem tieredItem)
 			return tieredItem.getTier().getLevel() >= ${data.breakHarvestLevel};
@@ -535,6 +535,8 @@ public class ${name}Block extends
 	<@onEntityCollides data.onEntityCollides/>
 
 	<@onEntityWalksOn data.onEntityWalksOn/>
+
+	<@onHitByProjectile data.onHitByProjectile/>
 
 	<@onBlockPlacedBy data.onBlockPlayedBy/>
 
