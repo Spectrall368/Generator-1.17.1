@@ -103,7 +103,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 			setPersistenceRequired();
         </#if>
 
-		<#if !data.equipmentMainHand.isEmpty()>
+	<#if !data.equipmentMainHand.isEmpty()>
         this.setItemSlot(EquipmentSlot.MAINHAND, ${mappedMCItemToItemStackCode(data.equipmentMainHand, 1)});
         </#if>
         <#if !data.equipmentOffHand.isEmpty()>
@@ -790,6 +790,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		builder = builder.add(Attributes.MAX_HEALTH, ${data.health});
 		builder = builder.add(Attributes.ARMOR, ${data.armorBaseValue});
 		builder = builder.add(Attributes.ATTACK_DAMAGE, ${data.attackStrength});
+		builder = builder.add(Attributes.FOLLOW_RANGE, ${data.followRange});
 
 		<#if (data.knockbackResistance > 0)>
 		builder = builder.add(Attributes.KNOCKBACK_RESISTANCE, ${data.knockbackResistance});
