@@ -126,8 +126,7 @@ public class ${name}Block extends
 		<#if data.hasTransparency>
 			.isRedstoneConductor((bs, br, bp) -> false)
 		</#if>
-		<#if (data.boundingBoxes?? && !data.blockBase?? && !data.isFullCube() && data.offsetType != "NONE")
-				|| (data.blockBase?has_content && data.blockBase == "Stairs")>
+		<#if (data.boundingBoxes?? && !data.blockBase?? && !data.isFullCube() && data.offsetType != "NONE") || (data.blockBase?has_content && data.blockBase == "Stairs") || (data.isLadder)>
 			.dynamicShape()
 		</#if>
 		<#if !data.useLootTableForDrops && (data.dropAmount == 0)>
