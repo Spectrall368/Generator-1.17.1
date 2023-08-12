@@ -119,7 +119,7 @@ public class ${name}PortalBlock extends NetherPortalBlock {
 	}
 
 	@OnlyIn(Dist.CLIENT) public static void registerRenderLayer() {
-		ItemBlockRenderTypes.setRenderLayer(${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}_PORTAL.get(), renderType -> renderType == RenderType.translucent());
+		ItemBlockRenderTypes.setRenderLayer(${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}_PORTAL, renderType -> renderType == RenderType.translucent());
 	}
 
 }
