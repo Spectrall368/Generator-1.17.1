@@ -168,7 +168,7 @@ public class ${name}Biome {
                     <#if data.hasVines() || data.hasFruits()>
                     	<@vinesAndFruits/>
                     <#else>
-                    	.decorators(ImmutableList.of(TrunkVineDecorator.INSTANCE, LeaveVineDecorator.INSTANCE))
+                    	.ignoreVines()
                     </#if>
             	.build())
             	.decorated(Features.Decorators.HEIGHTMAP_SQUARE)
@@ -366,7 +366,7 @@ public class ${name}Biome {
 
         return new Biome.BiomeBuilder()
             .precipitation(Biome.Precipitation.<#if (data.rainingPossibility > 0)><#if (data.temperature > 0.15)>RAIN<#else>SNOW</#if><#else>NONE</#if>)
-            .biomeCategory(Biome.BiomeCategory.${data.biomeCategory?replace("MOUNTAIN", "NONE")})
+            .biomeCategory(Biome.BiomeCategory.NONE)
             .depth(${data.baseHeight}f)
             .scale(${data.heightVariation}f)
             .temperature(${data.temperature}f)
@@ -382,14 +382,6 @@ public class ${name}Biome {
 
         <#if hasConfiguredFeatures>
         CONFIGURED_FEATURES.forEach((resourceLocation, configuredFeature) -> Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, resourceLocation, configuredFeature));
-        </#if>
-
-        <#if data.biomeDictionaryTypes?has_content>
-            BiomeDictionary.addTypes(ResourceKey.create(Registry.BIOME_REGISTRY, BuiltinRegistries.BIOME.getKey(${JavaModName}Biomes.${registryname?upper_case})),
-            <#list data.biomeDictionaryTypes as biomeDictionaryType>
-                BiomeDictionary.Type.${generator.map(biomeDictionaryType, "biomedictionarytypes")}<#if biomeDictionaryType?has_next>,</#if>
-        	</#list>
-        	);
         </#if>
 
         <#if data.spawnBiome>
