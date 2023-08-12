@@ -94,6 +94,8 @@ package ${package}.init;
                     </#if>
                 <#elseif block.getModElement().getTypeString() == "plant">
                     ${block.getModElement().getName()}Block.registerRenderLayer();
+                <#elseif block.getModElement().getTypeString() == "dimension">
+                    ${block.getModElement().getName()}PortalBlock.registerRenderLayer();
                 </#if>
             </#list>
 		}
