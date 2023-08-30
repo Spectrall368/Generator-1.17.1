@@ -1,6 +1,7 @@
 name: Minecraft Forge for @minecraft (@buildfileversion)
 status: deprecated
 buildfileversion: 37.1.1
+subversion: 1.0.1
 
 java_models:
   key: mojmap-1.17.x
