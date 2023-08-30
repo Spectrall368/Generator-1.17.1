@@ -2,5 +2,5 @@
 (new Object() {
 	public Item getRandomItem(ResourceLocation name) {
 		net.minecraft.tags.Tag<Item> _tag = ItemTags.getAllTags().getTagOrEmpty(name);
-		return _tag.getAllElements().isEmpty() ? Items.AIR : _tag.getRandomElement(new Random());
+		return _tag.getValues().isEmpty() ? Items.AIR : _tag.getRandomElement(new Random());
 }}.getRandomItem(${toResourceLocation(input$tag)}))
