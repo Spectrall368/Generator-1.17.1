@@ -1,3 +1,6 @@
 <#include "mcelements.ftl">
-(Registry.ITEM.getTag(ItemTags.getAllTags().getTagOrEmpty(${toResourceLocation(input$tag)}))
-    .flatMap(holderSet -> holderSet.getRandomElement(new Random())).map(Holder::value).orElseGet(() -> Items.AIR))
+(new Object() {
+	public Item getRandomItem(ResourceLocation name) {
+		net.minecraft.tags.Tag<Item> _tag = ItemTags.getAllTags().getTagOrEmpty(name);
+		return _tag.getAllElements().isEmpty() ? Items.AIR : _tag.getRandomElement(new Random());
+}}.getRandomItem(${toResourceLocation(input$tag)}))
