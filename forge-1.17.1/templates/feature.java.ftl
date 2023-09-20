@@ -1,7 +1,7 @@
 <#--
  # MCreator (https://mcreator.net/)
  # Copyright (C) 2012-2020, Pylo
- # Copyright (C) 2020-2021, Pylo, opensource contributors
+ # Copyright (C) 2020-2022, Pylo, opensource contributors
  #
  # This program is free software: you can redistribute it and/or modify
  # it under the terms of the GNU General Public License as published by
@@ -29,17 +29,19 @@
 -->
 
 <#-- @formatter:off -->
-<#include "../procedures.java.ftl">
-<#include "../mcitems.ftl">
+<#include "procedures.java.ftl">
+<#include "mcitems.ftl">
 
-package ${package}.world.features.lakes;
+package ${package}.world.features;
 
-public class ${name}Feature extends LakeFeature {
+<#assign configuration = generator.map(featuretype, "features", 1)>
+
+<#compress>
+public class ${name}Feature extends ${generator.map(featuretype, "features")} {
 	public static final ${name}Feature FEATURE = (${name}Feature) new ${name}Feature().setRegistryName("${modid}:${registryname}");
 	public static final ConfiguredFeature<?, ?> CONFIGURED_FEATURE = FEATURE
-				.configured(new BlockStateConfiguration(${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.defaultBlockState()))
-				.rangeUniform(VerticalAnchor.aboveBottom(0), VerticalAnchor.belowTop(0))
-				.squared().rarity(${data.frequencyOnChunks});
+				.configured(new ${configurationcode}(${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.defaultBlockState()));
+    				List.of(${placementcode?remove_ending(",")}));
 
 	public static final Set<ResourceLocation> GENERATE_BIOMES =
 	<#if data.restrictionBiomes?has_content>
@@ -53,30 +55,34 @@ public class ${name}Feature extends LakeFeature {
 	</#if>
 
 	public ${name}Feature() {
-		super(BlockStateConfiguration.CODEC);
+		super(${configuration}.CODEC);
 	}
 
-	public boolean place(FeaturePlaceContext<BlockStateConfiguration> context) {
+	<#if data.restrictionDimensions?has_content>
+ 	<#if data.hasGenerationConditions()>
+	public boolean place(FeaturePlaceContext<${configuration}> context) {
 		WorldGenLevel world = context.level();
+  		<#if data.restrictionDimensions?has_content>
 		ResourceKey<Level> dimensionType = world.getLevel().dimension();
+  		</#if>
 		boolean dimensionCriteria = false;
-
-		<#list data.spawnWorldTypes as worldType>
-			<#if worldType=="Surface">
+  		<#list data.restrictionDimensions as dimension>
+			<#if dimension == "Surface">
 				if(dimensionType == Level.OVERWORLD)
 					dimensionCriteria = true;
-			<#elseif worldType=="Nether">
+			<#elseif dimension =="Nether">
 				if(dimensionType == Level.NETHER)
 					dimensionCriteria = true;
-			<#elseif worldType=="End">
+			<#elseif dimension =="End">
 				if(dimensionType == Level.END)
 					dimensionCriteria = true;
 			<#else>
 				if(dimensionType == ResourceKey.create(Registry.DIMENSION_REGISTRY,
-						new ResourceLocation("${generator.getResourceLocationForModElement(worldType.toString().replace("CUSTOM:", ""))}")))
+						new ResourceLocation("${generator.getResourceLocationForModElement(dimension.toString().replace("CUSTOM:", ""))}")))
 					dimensionCriteria = true;
 			</#if>
 		</#list>
+	</#if>
 
 		if(!dimensionCriteria)
 			return false;
@@ -91,6 +97,5 @@ public class ${name}Feature extends LakeFeature {
 
 		return super.place(context);
 	}
-}
-
-<#-- @formatter:on -->
+	</#if>
+}</#compress>
