@@ -1,5 +1,3 @@
-<#include "procedures.java.ftl">
-
 <#macro particles type particleObj radius amount>
     <#if type=="Spread">
         <@particlesSpread particleObj radius amount/>
