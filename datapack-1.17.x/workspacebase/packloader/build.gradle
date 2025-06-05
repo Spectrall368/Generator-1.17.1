@@ -6,7 +6,7 @@ plugins {
 version = '1.0'
 base.archivesName = "packloader"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(16)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 legacyForge {
     version = "1.17.1-${generator.getGeneratorBuildFileVersion()}"
