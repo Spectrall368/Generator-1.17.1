@@ -4,17 +4,11 @@ templates:
   - template: fluid/fluidblock.java.ftl
     name: "@SRCROOT/@BASEPACKAGEPATH/block/@NAMEBlock.java"
   - template: fluid/fluidattributes.java.ftl
-    deleteWhenConditionFalse: true
     condition: extendsFluidAttributes()
     name: "@SRCROOT/@BASEPACKAGEPATH/fluid/attributes/@NAMEFluidAttributes.java"
   - template: fluid/fluidbucket.java.ftl
-    deleteWhenConditionFalse: true
     condition: generateBucket
     name: "@SRCROOT/@BASEPACKAGEPATH/item/@NAMEItem.java"
-  - template: fluid/fluidgen.java.ftl
-    deleteWhenConditionFalse: true
-    condition: doesGenerateInWorld()
-    name: "@SRCROOT/@BASEPACKAGEPATH/world/features/lakes/@NAMEFeature.java"
 
   - template: json/bucket.json.ftl
     writer: json
@@ -32,14 +26,12 @@ global_templates:
   - template: json/fluidtag.json.ftl
     writer: json
     variables: "type=water"
-    condition: ${w.hasFluidsOfType('water')}
-    deleteWhenConditionFalse: true
+    condition: "${w.getGElementsOfType('fluid')?filter(e -> e.type.equals('WATER'))?size != 0}"
     name: "@RESROOT/data/minecraft/tags/fluids/water.json"
   - template: json/fluidtag.json.ftl
     writer: json
     variables: "type=lava"
-    condition: ${w.hasFluidsOfType('lava')}
-    deleteWhenConditionFalse: true
+    condition: "${w.getGElementsOfType('fluid')?filter(e -> e.type.equals('LAVA'))?size != 0}"
     name: "@RESROOT/data/minecraft/tags/fluids/lava.json"
 
 localizationkeys:
@@ -49,3 +41,8 @@ localizationkeys:
     mapto: name
   - key: item.@modid.@registryname_bucket
     mapto: bucketName
+    condition: generateBucket
+  - fromlist: data.getFixedSpecialInformation()
+    key: item.@modid.@registryname_bucket.description_@item_index
+
+field_exclusions: [hasFog, fogColor, fogStartDistance, fogEndDistance]

@@ -6,18 +6,23 @@ templates:
   - template: livingentity/livingentity_projectile.java.ftl
     name: "@SRCROOT/@BASEPACKAGEPATH/entity/@NAMEEntityProjectile.java"
     condition: hasCustomProjectile()
-    deleteWhenConditionFalse: true
   - template: json/spawn_egg.json.ftl
     writer: json
     name: "@MODASSETSROOT/models/item/@registryname_spawn_egg.json"
     condition: hasSpawnEgg
-    deleteWhenConditionFalse: true
 
-unmodifiable_ai_bases: [Bat, MagmaCube, Slime]
+unmodifiable_ai_bases: [ Bat, MagmaCube, Slime ]
+
+tags:
+  - tag: ENTITIES:minecraft:raiders
+    condition: "${data.mobBehaviourType == 'Raider'}"
 
 localizationkeys:
   - key: item.@modid.@registryname_spawn_egg
     mapto: mobName
     suffix: " Spawn Egg"
+    condition: hasSpawnEgg
   - key: entity.@modid.@registryname
     mapto: mobName
+
+field_exclusions: [animations]

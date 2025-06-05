@@ -29,16 +29,16 @@
 
 <#-- @formatter:off -->
 <#include "../procedures.java.ftl">
-
+<#include "../triggers.java.ftl">
 package ${package}.item;
 
 public class ${name}Item extends Item {
 
 	public ${name}Item() {
-		super(new Item.Properties().tab(${data.igniterTab}).durability(64));
-
-		setRegistryName("${registryname}");
+		super(new Item.Properties().tab(<@CreativeTabs data.creativeTabs/>).rarity(Rarity.${data.igniterRarity}).durability(64));
 	}
+
+	<@addSpecialInformation data.specialInformation, "item." + modid + "." + registryname/>
 
 	@Override public InteractionResult useOn(UseOnContext context) {
 		Player entity = context.getPlayer();

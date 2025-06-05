@@ -43,14 +43,12 @@
  *
  * This class will be added in the mod root package.
 */
-
 package ${package};
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ${name} {
 
 	public ${name}() {
-
 	}
 
 	@SubscribeEvent
@@ -59,7 +57,7 @@ public class ${name} {
 	}
 
     @Mod.EventBusSubscriber
-	private static class ForgeBusEvents {
+	private static class ${name}ForgeBusEvents {
 
 		// Example Forge bus event registration
 		@SubscribeEvent public static void addFeatureToBiomes(BiomeLoadingEvent event) {
@@ -76,8 +74,6 @@ public class ${name} {
 		public static void clientLoad(FMLClientSetupEvent event) {
 
 		}
-
 	}
-
 }
 <#-- @formatter:on -->

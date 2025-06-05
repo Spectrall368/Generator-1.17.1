@@ -33,30 +33,49 @@
 <#include "../procedures.java.ftl">
 <#include "../triggers.java.ftl">
 <#include "../mcitems.ftl">
-
 package ${package}.block;
 
-import net.minecraft.world.level.material.Material;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 
-public class ${name}Block extends <#if data.plantType == "normal">Flower<#elseif data.plantType == "growapable">SugarCane<#elseif data.plantType == "double">DoublePlant</#if>Block<#if data.hasTileEntity> implements EntityBlock</#if>{
+<#compress>
+<#assign interfaces = []>
+<#if data.hasTileEntity>
+	<#assign interfaces += ["EntityBlock"]>
+</#if>
+<#if data.isBonemealable && data.plantType != "sapling">
+	<#assign interfaces += ["BonemealableBlock"]>
+</#if>
+<#if data.isWaterloggable()>
+ 	<#assign interfaces += ["SimpleWaterloggedBlock"]>
+ </#if>
+public class ${name}Block extends ${getPlantClass(data.plantType)}Block
+	<#if interfaces?size gt 0>
+		implements ${interfaces?join(",")}
+	</#if>{
+	<#if data.isWaterloggable()>
+ 		public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+ 	</#if>
 	public ${name}Block() {
-		super(<#if data.plantType == "normal">() -> ${generator.map(data.suspiciousStewEffect, "effects")}, ${data.suspiciousStewDuration},</#if>
+		super(<#if data.plantType == "normal">
+		() -> ${generator.map(data.suspiciousStewEffect, "effects")}, ${data.suspiciousStewDuration},
+		<#elseif data.plantType == "sapling">
+		new ${name}TreeGrower(),
+		</#if>
 		<#if generator.map(data.colorOnMap, "mapcolors") != "DEFAULT">
 		BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.${generator.map(data.colorOnMap, "mapcolors")})
 		<#else>
 		BlockBehaviour.Properties.of(Material.PLANT)
 		</#if>
-		<#if data.plantType == "growapable" || data.forceTicking>
+		<#if data.plantType == "growapable" || data.plantType == "sapling" || data.forceTicking>
 		.randomTicks()
 		</#if>
 		<#if data.isCustomSoundType>
-			.sound(new ForgeSoundType(1.0f, 1.0f, () -> new SoundEvent(new ResourceLocation("${data.breakSound}")),
-			() -> new SoundEvent(new ResourceLocation("${data.stepSound}")),
-			() -> new SoundEvent(new ResourceLocation("${data.placeSound}")),
-			() -> new SoundEvent(new ResourceLocation("${data.hitSound}")),
-			() -> new SoundEvent(new ResourceLocation("${data.fallSound}"))))
+			.sound(new ForgeSoundType(1.0f, 1.0f,
+				() -> ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("${data.breakSound}")),
+				() -> ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("${data.stepSound}")),
+				() -> ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("${data.placeSound}")),
+				() -> ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("${data.hitSound}")),
+				() -> ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("${data.fallSound}"))
 		<#else>
 			.sound(SoundType.${data.soundOnStep})
 		</#if>
@@ -79,9 +98,6 @@ public class ${name}Block extends <#if data.plantType == "normal">Flower<#elseif
 		<#if data.luminance != 0>
 		.lightLevel(s -> ${data.luminance})
 		</#if>
-		<#if !data.useLootTableForDrops && (data.dropAmount == 0)>
-		.noDrops()
-		</#if>
 		<#if data.isSolid>
 		.noOcclusion()
 			<#if (data.customBoundingBox && data.boundingBoxes??) || (data.offsetType != "NONE")>
@@ -91,8 +107,33 @@ public class ${name}Block extends <#if data.plantType == "normal">Flower<#elseif
 		.noCollission()
 		</#if>
 		);
-		setRegistryName("${registryname}");
+		<#if data.isWaterloggable()>
+ 		<@initStateProperties/>
+ 		</#if>
+ 	}
+
+	<#if data.isWaterloggable()>
+ 	@Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+ 		super.createBlockStateDefinition(builder);
+ 		builder.add(WATERLOGGED);
+ 	}
+
+ 	@Override
+ 	public BlockState getStateForPlacement(BlockPlaceContext context) {
+ 		return super.getStateForPlacement(context).setValue(WATERLOGGED, context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER);
 	}
+
+	@Override public FluidState getFluidState(BlockState state) {
+ 		return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
+ 	}
+
+ 	@Override public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor world, BlockPos currentPos, BlockPos facingPos) {
+ 		if (state.getValue(WATERLOGGED)) {
+ 			world.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
+ 		}
+ 		return super.updateShape(state, facing, facingState, world, currentPos, facingPos);
+ 	}
+ 	</#if>
 
 	<#if data.customBoundingBox && data.boundingBoxes??>
 	@Override public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
@@ -135,14 +176,7 @@ public class ${name}Block extends <#if data.plantType == "normal">Flower<#elseif
 	}
 	</#if>
 
-	<#if data.specialInfo?has_content>
-	@Override public void appendHoverText(ItemStack itemstack, BlockGetter world, List<Component> list, TooltipFlag flag) {
-		super.appendHoverText(itemstack, world, list, flag);
-		<#list data.specialInfo as entry>
-		list.add(new TextComponent("${JavaConventions.escapeStringForJava(entry)}"));
-		</#list>
-	}
-	</#if>
+	<@addSpecialInformation data.specialInformation, "block." + modid + "." + registryname, true/>
 
 	<#if data.fireSpreadSpeed != 0>
 	@Override public int getFireSpreadSpeed(BlockState state, BlockGetter world, BlockPos pos, Direction face) {
@@ -154,46 +188,6 @@ public class ${name}Block extends <#if data.plantType == "normal">Flower<#elseif
 	@Override public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
 		return ${mappedMCItemToItemStackCode(data.creativePickItem, 1)};
 	}
-	</#if>
-
-	<#if !(data.useLootTableForDrops || (data.dropAmount == 0))>
-		<#if data.dropAmount != 1 && !(data.customDrop?? && !data.customDrop.isEmpty())>
-		@Override public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
-			<#if data.plantType == "double">
-			if(state.getValue(HALF) != DoubleBlockHalf.LOWER)
-				return Collections.emptyList();
-			</#if>
-
-			List<ItemStack> dropsOriginal = super.getDrops(state, builder);
-			if(!dropsOriginal.isEmpty())
-				return dropsOriginal;
-			return Collections.singletonList(new ItemStack(this, ${data.dropAmount}));
-		}
-		<#elseif data.customDrop?? && !data.customDrop.isEmpty()>
-		@Override public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
-			<#if data.plantType == "double">
-			if(state.getValue(HALF) != DoubleBlockHalf.LOWER)
-				return Collections.emptyList();
-			</#if>
-
-			List<ItemStack> dropsOriginal = super.getDrops(state, builder);
-			if(!dropsOriginal.isEmpty())
-				return dropsOriginal;
-			return Collections.singletonList(${mappedMCItemToItemStackCode(data.customDrop, data.dropAmount)});
-		}
-		<#else>
-		@Override public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
-			<#if data.plantType == "double">
-			if(state.getValue(HALF) != DoubleBlockHalf.LOWER)
-				return Collections.emptyList();
-			</#if>
-
-			List<ItemStack> dropsOriginal = super.getDrops(state, builder);
-			if(!dropsOriginal.isEmpty())
-				return dropsOriginal;
-			return Collections.singletonList(new ItemStack(this, 1));
-		}
-		</#if>
 	</#if>
 
 	<#if (data.canBePlacedOn?size > 0) || hasProcedure(data.placingCondition)>
@@ -223,7 +217,7 @@ public class ${name}Block extends <#if data.plantType == "normal">Flower<#elseif
 			BlockPos blockpos = pos.below();
 			BlockState groundState = worldIn.getBlockState(blockpos);
 
-			<#if data.plantType = "normal">
+			<#if data.plantType == "normal" || data.plantType == "sapling">
 				return this.mayPlaceOn(groundState, worldIn, blockpos)
 			<#elseif data.plantType == "growapable">
 				<#if hasProcedure(data.placingCondition)>
@@ -251,7 +245,7 @@ public class ${name}Block extends <#if data.plantType == "normal">Flower<#elseif
 		}
 	</#if>
 
-	<#if !(data.growapableSpawnType == "Plains" && data.plantType == "normal")>
+	<#if !(data.growapableSpawnType == "Plains" && (data.plantType == "normal" || data.plantType == "sapling"))>
 	@Override public PlantType getPlantType(BlockGetter world, BlockPos pos) {
 		return PlantType.${generator.map(data.growapableSpawnType, "planttypes")};
 	}
@@ -259,24 +253,40 @@ public class ${name}Block extends <#if data.plantType == "normal">Flower<#elseif
 
 	<@onBlockAdded data.onBlockAdded, false, 0/>
 
-	<@onBlockTick data.onTickUpdate, false, 0/>
-
-	<#if data.plantType == "growapable">
-	@Override public void randomTick(BlockState blockstate, ServerLevel world, BlockPos blockpos, Random random) {
-		if (world.isEmptyBlock(blockpos.above())) {
+	<#if data.plantType == "growapable" || hasProcedure(data.onTickUpdate)>
+	@Override public void randomTick(BlockState blockstate, ServerLevel world, BlockPos pos, Random random) {
+		<#if data.plantType == "growapable">
+		<#if data.isWaterloggable()>
+ 		boolean flag = world.getBlockState(pos.above()).is(Blocks.WATER);
+ 		</#if>
+ 		if (world.isEmptyBlock(pos.above()) <#if data.isWaterloggable()>|| flag</#if>) {
 			int i = 1;
-			for(;world.getBlockState(blockpos.below(i)).is(this); ++i);
+			for(;world.getBlockState(pos.below(i)).is(this); ++i);
 			if (i < ${data.growapableMaxHeight}) {
 				int j = blockstate.getValue(AGE);
-				if (ForgeHooks.onCropsGrowPre(world, blockpos, blockstate, true)) {
+				if (ForgeHooks.onCropsGrowPre(world, pos, blockstate, true)) {
 					if (j == 15) {
-						world.setBlockAndUpdate(blockpos.above(), defaultBlockState());
-						world.setBlock(blockpos, blockstate.setValue(AGE, 0), 4);
-					} else
-						world.setBlock(blockpos, blockstate.setValue(AGE, j + 1), 4);
+						world.setBlockAndUpdate(pos.above(), defaultBlockState()<#if data.isWaterloggable()>.setValue(WATERLOGGED, flag)</#if>);
+						world.setBlock(pos, blockstate.setValue(AGE, 0), 4);
+					} else {
+						world.setBlock(pos, blockstate.setValue(AGE, j + 1), 4);
+					}
 				}
 			}
 		}
+		<#elseif data.plantType == "sapling">
+		super.randomTick(blockstate, world, pos, random);
+		</#if>
+
+		<#if hasProcedure(data.onTickUpdate)>
+			<@procedureCode data.onTickUpdate, {
+			"x": "pos.getX()",
+			"y": "pos.getY()",
+			"z": "pos.getZ()",
+			"world": "world",
+			"blockstate": "blockstate"
+			}/>
+		</#if>
 	}
 	</#if>
 
@@ -300,6 +310,10 @@ public class ${name}Block extends <#if data.plantType == "normal">Flower<#elseif
 
 	<@onHitByProjectile data.onHitByProjectile/>
 
+	<#if data.isBonemealable && data.plantType != "sapling">
+	<@bonemealEvents data.isBonemealTargetCondition, data.bonemealSuccessCondition, data.onBonemealSuccess/>
+	</#if>
+
 	<#if data.hasTileEntity>
 	@Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new ${name}BlockEntity(pos, state);
@@ -313,7 +327,7 @@ public class ${name}Block extends <#if data.plantType == "normal">Flower<#elseif
 	</#if>
 
 	@OnlyIn(Dist.CLIENT) public static void registerRenderLayer() {
-		ItemBlockRenderTypes.setRenderLayer(${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}, renderType -> renderType == RenderType.cutout());
+		ItemBlockRenderTypes.setRenderLayer(${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.get(), renderType -> renderType == RenderType.cutout());
 	}
 
 	<#if data.tintType != "No tint">
@@ -341,7 +355,7 @@ public class ${name}Block extends <#if data.plantType == "normal">Flower<#elseif
 						Minecraft.getInstance().level.getBiome(pos).getWaterFogColor() : 329011;
 					</#if>
 				</#if>
-			}, ${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()});
+			}, ${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.get());
 		}
 
 		<#if data.isItemTinted>
@@ -364,16 +378,54 @@ public class ${name}Block extends <#if data.plantType == "normal">Flower<#elseif
 				<#else>
 					return 329011;
 				</#if>
-			}, ${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()});
+			}, ${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.get());
 		}
 		</#if>
 	</#if>
 }
+</#compress>
 <#-- @formatter:on -->
-
+<#function getPlantClass plantType>
+	<#if plantType == "normal"><#return "Flower">
+	<#elseif plantType == "growapable"><#return "SugarCane">
+	<#elseif plantType == "double"><#return "DoublePlant">
+	<#elseif plantType == "sapling"><#return "Sapling">
+	</#if>
+</#function>
 <#macro canPlaceOnList blockList condition>
-<#if (blockList?size > 1) && condition>(</#if>
-<#list blockList as canBePlacedOn>
-groundState.is(${mappedBlockToBlock(canBePlacedOn)})<#sep>||
-</#list><#if (blockList?size > 1) && condition>)</#if>
+	<#if (blockList?size > 1) && condition>(</#if>
+	<#list blockList as canBePlacedOn>
+	groundState.is(${mappedBlockToBlock(canBePlacedOn)})<#sep>||
+	</#list><#if (blockList?size > 1) && condition>)</#if>
+</#macro>
+<#macro toTreeGrower secondaryChance megaTree="" megaTree2="" tree="" tree2="" flowerTree="" flowerTree2="">
+	<#if (megaTree2?has_content || tree2?has_content || flowerTree2?has_content) && secondaryChance != 0>
+	new TreeGrower("${data.getModElement().getRegistryName()}", ${secondaryChance}f,
+		<@toOptionalTree megaTree/>, <@toOptionalTree megaTree2/>, <@toOptionalTree tree/>,
+		<@toOptionalTree tree2/>, <@toOptionalTree flowerTree/>, <@toOptionalTree flowerTree2/>
+	);
+	<#else>
+	new TreeGrower("${data.getModElement().getRegistryName()}", <@toOptionalTree megaTree/>, <@toOptionalTree tree/>, <@toOptionalTree flowerTree/>);
+	</#if>
+</#macro>
+<#macro toOptionalTree tree="">
+	<#if tree?has_content>
+	Optional.of(getFeatureKey("${generator.map(tree, "configuredfeatures")}"))
+	<#else>
+	Optional.empty()
+	</#if>
+</#macro>
+<#macro initStateProperties>
+this.registerDefaultState(this.stateDefinition.any()
+	<#if data.plantType == "double">
+	.setValue(HALF, DoubleBlockHalf.LOWER)
+	<#elseif data.plantType == "growapable">
+	.setValue(AGE, 0)
+	<#elseif data.plantType == "sapling">
+	.setValue(STAGE, 0)
+	</#if>
+	<#if data.isWaterloggable()>
+	.setValue(WATERLOGGED, false)
+	</#if>
+);
 </#macro>

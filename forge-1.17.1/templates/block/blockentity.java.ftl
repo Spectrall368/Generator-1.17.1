@@ -1,7 +1,7 @@
 <#--
  # MCreator (https://mcreator.net/)
  # Copyright (C) 2012-2020, Pylo
- # Copyright (C) 2020-2021, Pylo, opensource contributors
+ # Copyright (C) 2020-2023, Pylo, opensource contributors
  #
  # This program is free software: you can redistribute it and/or modify
  # it under the terms of the GNU General Public License as published by
@@ -30,7 +30,9 @@
 
 <#-- @formatter:off -->
 package ${package}.block.entity;
+<#include "../procedures.java.ftl">
 
+<#compress>
 public class ${name}BlockEntity extends RandomizableContainerBlockEntity implements WorldlyContainer {
 
 	private NonNullList<ItemStack> stacks = NonNullList.<ItemStack>withSize(${data.inventorySize}, ItemStack.EMPTY);
@@ -38,7 +40,7 @@ public class ${name}BlockEntity extends RandomizableContainerBlockEntity impleme
 	private final LazyOptional<? extends IItemHandler>[] handlers = SidedInvWrapper.create(this, Direction.values());
 
 	public ${name}BlockEntity(BlockPos position, BlockState state) {
-		super(${JavaModName}BlockEntities.${data.getModElement().getRegistryNameUpper()}, position, state);
+		super(${JavaModName}BlockEntities.${data.getModElement().getRegistryNameUpper()}.get(), position, state);
 	}
 
 	@Override public void load(CompoundTag compound) {
@@ -106,11 +108,11 @@ public class ${name}BlockEntity extends RandomizableContainerBlockEntity impleme
 	}
 
 	@Override public AbstractContainerMenu createMenu(int id, Inventory inventory) {
-			<#if !data.guiBoundTo?has_content || data.guiBoundTo == "<NONE>" || !(data.guiBoundTo)?has_content>
-				return ChestMenu.threeRows(id, inventory);
-            <#else>
-				return new ${data.guiBoundTo}Menu(id, inventory, new FriendlyByteBuf(Unpooled.buffer()).writeBlockPos(this.worldPosition));
-            </#if>
+		<#if !data.guiBoundTo?has_content>
+		return ChestMenu.threeRows(id, inventory);
+		<#else>
+		return new ${data.guiBoundTo}Menu(id, inventory, new FriendlyByteBuf(Unpooled.buffer()).writeBlockPos(this.worldPosition));
+		</#if>
 	}
 
 	@Override public Component getDisplayName() {
@@ -126,10 +128,10 @@ public class ${name}BlockEntity extends RandomizableContainerBlockEntity impleme
 	}
 
 	@Override public boolean canPlaceItem(int index, ItemStack stack) {
-			<#list data.inventoryOutSlotIDs as id>
-			    if (index == ${id})
-					return false;
-            </#list>
+		<#list data.inventoryOutSlotIDs as id>
+		if (index == ${id})
+			return false;
+		</#list>
 		return true;
 	}
 
@@ -138,16 +140,31 @@ public class ${name}BlockEntity extends RandomizableContainerBlockEntity impleme
 		return IntStream.range(0, this.getContainerSize()).toArray();
 	}
 
-	@Override public boolean canPlaceItemThroughFace(int index, ItemStack stack, @Nullable Direction direction) {
-		return this.canPlaceItem(index, stack);
+	@Override public boolean canPlaceItemThroughFace(int index, ItemStack itemstack, @Nullable Direction direction) {
+		return this.canPlaceItem(index, itemstack)
+		<#if hasProcedure(data.inventoryAutomationPlaceCondition)>&&
+			<@procedureCode data.inventoryAutomationPlaceCondition, {
+				"index": "index",
+				"itemstack": "itemstack",
+				"direction": "direction"
+			}, false/>
+		</#if>;
 	}
 
-	@Override public boolean canTakeItemThroughFace(int index, ItemStack stack, Direction direction) {
-			<#list data.inventoryInSlotIDs as id>
-			    if (index == ${id})
-					return false;
-            </#list>
-		return true;
+	@Override public boolean canTakeItemThroughFace(int index, ItemStack itemstack, Direction direction) {
+		<#list data.inventoryInSlotIDs as id>
+		if (index == ${id})
+			return false;
+		</#list>
+		<#if hasProcedure(data.inventoryAutomationTakeCondition)>
+			return <@procedureCode data.inventoryAutomationTakeCondition, {
+				"index": "index",
+				"itemstack": "itemstack",
+				"direction": "direction"
+			}, false/>;
+		<#else>
+			return true;
+		</#if>
 	}
 	<#-- END: ISidedInventory -->
 
@@ -177,12 +194,7 @@ public class ${name}BlockEntity extends RandomizableContainerBlockEntity impleme
         <#if data.fluidRestrictions?has_content>
 		private final FluidTank fluidTank = new FluidTank(${data.fluidCapacity}, fs -> {
 			<#list data.fluidRestrictions as fluidRestriction>
-                <#if fluidRestriction.getUnmappedValue().startsWith("CUSTOM:")>
-					if(fs.getFluid() ==
-					${JavaModName}Fluids.<#if fluidRestriction.getUnmappedValue().endsWith(":Flowing")>FLOWING_</#if>${generator.getRegistryNameForModElement(fluidRestriction.getUnmappedValue()?remove_beginning("CUSTOM:")?remove_ending(":Flowing"))?upper_case}) return true;
-                <#else>
-				if(fs.getFluid() == Fluids.${fluidRestriction}) return true;
-                </#if>
+            if (fs.getFluid() == ${fluidRestriction}) return true;
             </#list>
 
 			return false;
@@ -208,15 +220,15 @@ public class ${name}BlockEntity extends RandomizableContainerBlockEntity impleme
 		if (!this.remove && facing != null && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 			return handlers[facing.ordinal()].cast();
 
-			<#if data.hasEnergyStorage>
-			if (!this.remove && capability == CapabilityEnergy.ENERGY)
-				return LazyOptional.of(() -> energyStorage).cast();
-            </#if>
+		<#if data.hasEnergyStorage>
+		if (!this.remove && capability == CapabilityEnergy.ENERGY)
+			return LazyOptional.of(() -> energyStorage).cast();
+        </#if>
 
-			<#if data.isFluidTank>
-			if (!this.remove && capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
-				return LazyOptional.of(() -> fluidTank).cast();
-            </#if>
+		<#if data.isFluidTank>
+		if (!this.remove && capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+			return LazyOptional.of(() -> fluidTank).cast();
+        </#if>
 
 		return super.getCapability(capability, facing);
 	}
@@ -226,6 +238,6 @@ public class ${name}BlockEntity extends RandomizableContainerBlockEntity impleme
 		for(LazyOptional<? extends IItemHandler> handler : handlers)
 			handler.invalidate();
 	}
-
 }
+</#compress>
 <#-- @formatter:on -->

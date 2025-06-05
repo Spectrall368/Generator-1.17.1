@@ -28,20 +28,18 @@
 -->
 
 <#-- @formatter:off -->
-
 package ${package}.fluid.attributes;
 
 public class ${name}FluidAttributes extends FluidAttributes {
 
-	public static class CustomBuilder extends FluidAttributes.Builder {
-		protected CustomBuilder(ResourceLocation stillTexture, ResourceLocation flowingTexture,
-				BiFunction<FluidAttributes.Builder, Fluid, FluidAttributes> factory) {
-			super(stillTexture, flowingTexture, factory);
-		}
-	}
-
 	public static CustomBuilder builder(ResourceLocation stillTexture, ResourceLocation flowingTexture) {
 		return new CustomBuilder(stillTexture, flowingTexture, ${name}FluidAttributes::new);
+	}
+
+	public static class CustomBuilder extends FluidAttributes.Builder {
+		protected CustomBuilder(ResourceLocation stillTexture, ResourceLocation flowingTexture, BiFunction<FluidAttributes.Builder, Fluid, FluidAttributes> factory) {
+			super(stillTexture, flowingTexture, factory);
+		}
 	}
 
 	protected ${name}FluidAttributes(Builder builder, Fluid fluid) {
@@ -73,5 +71,4 @@ public class ${name}FluidAttributes extends FluidAttributes {
 		</#if> | 0xFF000000;
 	}
 	</#if>
-
 }

@@ -29,17 +29,7 @@
 -->
 
 <#-- @formatter:off -->
-<#include "tokens.ftl">
 <#include "procedures.java.ftl">
-
-<#assign hasTextures = data.baseTexture?has_content>
-<#list data.components as component>
-	<#if component.getClass().getSimpleName() == "Image">
-		<#assign hasTextures = true>
-		<#break>
-	</#if>
-</#list>
-
 package ${package}.client.gui;
 
 @Mod.EventBusSubscriber({Dist.CLIENT}) public class ${name}Overlay {
@@ -57,28 +47,20 @@ package ${package}.client.gui;
 			int h = event.getGui().height;
 	</#if>
 
-			int posX = w / 2;
-			int posY = h / 2;
-
-			Level _world = null;
-			double _x = 0;
-			double _y = 0;
-			double _z = 0;
+			Level world = null;
+			double x = 0;
+			double y = 0;
+			double z = 0;
 
 			Player entity = Minecraft.getInstance().player;
 			if (entity != null) {
-				_world = entity.level;
-				_x = entity.getX();
-				_y = entity.getY();
-				_z = entity.getZ();
+				world = entity.level;
+				x = entity.getX();
+				y = entity.getY();
+				z = entity.getZ();
 			}
 
-			Level world = _world;
-			double x = _x;
-			double y = _y;
-			double z = _z;
-
-			<#if hasTextures>
+			<#if data.hasTextures()>
 				RenderSystem.disableDepthTest();
 				RenderSystem.depthMask(false);
 				RenderSystem.enableBlend();
@@ -94,38 +76,104 @@ package ${package}.client.gui;
 					Minecraft.getInstance().gui.blit(event.getMatrixStack(), 0, 0, 0, 0, w, h, w, h);
 				</#if>
 
-				<#list data.components as component>
-	                <#assign x = component.x - 213>
-	                <#assign y = component.y - 120>
-	                <#if component.getClass().getSimpleName() == "Label">
+				<#list data.getComponentsOfType("Image") as component>
+					<#if hasProcedure(component.displayCondition)>
+										if (<@procedureOBJToConditionCode component.displayCondition/>) {
+					</#if>
+										RenderSystem.setShaderTexture(0, new ResourceLocation("${modid}:textures/screens/${component.image}"));
+										Minecraft.getInstance().gui.blit(event.getMatrixStack(), <@calculatePosition component/>, 0, 0,
+					${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())},
+					${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())});
+					<#if hasProcedure(component.displayCondition)>}</#if>
+				</#list>
+
+        	<#list data.getComponentsOfType("Sprite") as component>
+ 				<#if hasProcedure(component.displayCondition)>if (<@procedureOBJToConditionCode component.displayCondition/>) {</#if>
+ 					RenderSystem.setShaderTexture(0, new ResourceLocation("${modid}:textures/screens/${component.sprite}"));
+ 					Minecraft.getInstance().gui.blit(event.getMatrixStack(), <@calculatePosition component/>,
+ 						<#if (component.getTextureWidth(w.getWorkspace()) > component.getTextureHeight(w.getWorkspace()))>
+ 							<@getSpriteByIndex component "width"/>, 0
+ 						<#else>
+ 							0, <@getSpriteByIndex component "height"/>
+ 						</#if>,
+ 						${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())},
+ 						${component.getTextureWidth(w.getWorkspace())}, ${component.getTextureHeight(w.getWorkspace())});
+ 				<#if hasProcedure(component.displayCondition)>}</#if>
+         	</#list>
+
+				<#list data.getComponentsOfType("Label") as component>
 						<#if hasProcedure(component.displayCondition)>
 						if (<@procedureOBJToConditionCode component.displayCondition/>)
 						</#if>
-						Minecraft.getInstance().font.draw(event.getMatrixStack(), "${translateTokens(JavaConventions.escapeStringForJava(component.text))}",
-									posX + ${x}, posY + ${y}, ${component.color.getRGB()});
-	                <#elseif component.getClass().getSimpleName() == "Image">
-						<#if hasProcedure(component.displayCondition)>
-						if (<@procedureOBJToConditionCode component.displayCondition/>) {
-						</#if>
-						RenderSystem.setShaderTexture(0, new ResourceLocation("${modid}:textures/screens/${component.image}"));
-						Minecraft.getInstance().gui.blit(event.getMatrixStack(), posX + ${x}, posY + ${y}, 0, 0,
-							${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())},
-							${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())});
+						Minecraft.getInstance().font.draw(event.getMatrixStack(),
+							<#if hasProcedure(component.text)><@procedureOBJToStringCode component.text/><#else>new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}")</#if>,
+                    <@calculatePosition component/>, ${component.color.getRGB()});
+            </#list>
 
-						<#if hasProcedure(component.displayCondition)>}</#if>
-	                </#if>
-	            </#list>
+				<#list data.getComponentsOfType("EntityModel") as component>
+					if (<@procedureOBJToConditionCode component.entityModel/> instanceof LivingEntity livingEntity) {
+						<#if hasProcedure(component.displayCondition)>
+							if (<@procedureOBJToConditionCode component.displayCondition/>)
+						</#if>
+
+					InventoryScreen.renderEntityInInventory(<@calculatePosition component=component x_offset=10 y_offset=20/>,
+                        ${component.scale}, ${component.rotationX / 20.0}f, 0, livingEntity);
+					}
+				</#list>
 			}
 
-			<#if hasTextures>
+			<#if data.hasTextures()>
 				RenderSystem.depthMask(true);
 				RenderSystem.defaultBlendFunc();
 				RenderSystem.enableDepthTest();
 				RenderSystem.disableBlend();
 				RenderSystem.setShaderColor(1, 1, 1, 1);
 			</#if>
-		}
+        }
 	}
-
 }
+<#macro calculatePosition component x_offset=0 y_offset=0>
+	<#if component.anchorPoint.name() == "TOP_LEFT">
+		${component.x + x_offset}, ${component.y + y_offset}
+	<#elseif component.anchorPoint.name() == "TOP_CENTER">
+		w / 2 + ${component.x - (213 - x_offset)}, ${component.y + y_offset}
+	<#elseif component.anchorPoint.name() == "TOP_RIGHT">
+		w - ${427 - (component.x + x_offset)}, ${component.y + y_offset}
+	<#elseif component.anchorPoint.name() == "CENTER_LEFT">
+		${component.x + x_offset}, h / 2 + ${component.y - (120 - y_offset)}
+	<#elseif component.anchorPoint.name() == "CENTER">
+		w / 2 + ${component.x - (213 - x_offset)}, h / 2 + ${component.y - (120 - y_offset)}
+	<#elseif component.anchorPoint.name() == "CENTER_RIGHT">
+		w - ${427 - (component.x + x_offset)}, h / 2 + ${component.y - (120 - y_offset)}
+	<#elseif component.anchorPoint.name() == "BOTTOM_LEFT">
+		${component.x + x_offset}, h - ${240 - (component.y + y_offset)}
+	<#elseif component.anchorPoint.name() == "BOTTOM_CENTER">
+		w / 2 + ${component.x - (213 - x_offset)}, h - ${240 - (component.y + y_offset)}
+	<#elseif component.anchorPoint.name() == "BOTTOM_RIGHT">
+		w - ${427 - (component.x + x_offset)}, h - ${240 - (component.y + y_offset)}
+	</#if>
+</#macro>
+ <#macro getSpriteByIndex component dim>
+ 	<#if hasProcedure(component.spriteIndex)>
+ 		Mth.clamp((int) <@procedureOBJToNumberCode component.spriteIndex/> *
+ 			<#if dim == "width">
+ 				${component.getWidth(w.getWorkspace())}
+ 			<#else>
+ 				${component.getHeight(w.getWorkspace())}
+ 			</#if>,
+ 			0,
+ 			<#if dim == "width">
+ 				${component.getTextureWidth(w.getWorkspace()) - component.getWidth(w.getWorkspace())}
+ 			<#else>
+ 				${component.getTextureHeight(w.getWorkspace()) - component.getHeight(w.getWorkspace())}
+ 			</#if>
+ 		)
+ 	<#else>
+ 		<#if dim == "width">
+ 			${component.getWidth(w.getWorkspace()) * component.spriteIndex.getFixedValue()}
+ 		<#else>
+ 			${component.getHeight(w.getWorkspace()) * component.spriteIndex.getFixedValue()}
+ 		</#if>
+ 	</#if>
+ </#macro>
 <#-- @formatter:on -->

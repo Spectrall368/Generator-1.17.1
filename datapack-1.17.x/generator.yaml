@@ -1,9 +1,10 @@
 name: Data Pack for Java Edition @minecraft
 status: deprecated
-buildfileversion: 1.1
+buildfileversion: 37.1.1
 
 # gradle task definitions
 gradle:
+  run_client: ":packloader:runClient"
   export_file: "build/export/export.zip"
 
 # base generator roots
@@ -11,7 +12,6 @@ source_root: "@WORKSPACEROOT/src/main/"
 res_root: "@SRCROOT"
 mod_assets_root: "@RESROOT/assets/@modid"
 mod_data_root: "@RESROOT/data/@modid"
-screen_textures_dir: "@MODASSETSROOT/textures/screens"
 
 # specific resource folders
 structures_dir: "@MODDATAROOT/structures"
@@ -20,3 +20,7 @@ base_templates:
   - template: pack.mcmeta.ftl
     writer: json
     name: "@SRCROOT/pack.mcmeta"
+
+tags:
+  template: tags.json.ftl
+  name: "@RESROOT/data/@namespace/tags/@folder_pre21/@name.json"

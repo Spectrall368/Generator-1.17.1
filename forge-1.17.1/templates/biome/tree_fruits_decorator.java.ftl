@@ -1,7 +1,7 @@
 <#--
  # MCreator (https://mcreator.net/)
  # Copyright (C) 2012-2020, Pylo
- # Copyright (C) 2020-2021, Pylo, opensource contributors
+ # Copyright (C) 2020-2023, Pylo, opensource contributors
  #
  # This program is free software: you can redistribute it and/or modify
  # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  # GNU General Public License for more details.
  #
  # You should have received a copy of the GNU General Public License
- # along setValue this program.  If not, see <https://www.gnu.org/licenses/>.
+ # along with this program.  If not, see <https://www.gnu.org/licenses/>.
  #
  # Additional permission for code generator templates (*.ftl files)
  #
@@ -29,21 +29,17 @@
 -->
 
 <#-- @formatter:off -->
-package ${package}.world.features.treedecorators;
 <#include "../mcitems.ftl">
+package ${package}.world.features.treedecorators;
 
 public class ${name}FruitDecorator extends CocoaDecorator {
 
-    public static final ${name}FruitDecorator INSTANCE = new ${name}FruitDecorator();
-
-    public static com.mojang.serialization.Codec<${name}FruitDecorator> codec;
-    public static TreeDecoratorType<?> tdt;
+    public static final Codec<${name}FruitDecorator> CODEC = Codec.unit(${name}FruitDecorator::new);
+    public static final TreeDecoratorType<?> DECORATOR_TYPE = new TreeDecoratorType<>(CODEC);
 
     static {
-        codec = com.mojang.serialization.Codec.unit(() -> INSTANCE);
-        tdt = new TreeDecoratorType<>(codec);
-        tdt.setRegistryName("${registryname}_tree_fruit_decorator");
-        ForgeRegistries.TREE_DECORATOR_TYPES.register(tdt);
+        DECORATOR_TYPE.setRegistryName("${modid}:${registryname}_tree_fruit_decorator");
+        ForgeRegistries.TREE_DECORATOR_TYPES.register(DECORATOR_TYPE);
     }
 
     public ${name}FruitDecorator() {
@@ -51,18 +47,25 @@ public class ${name}FruitDecorator extends CocoaDecorator {
     }
 
     @Override protected TreeDecoratorType<?> type() {
-        return tdt;
+        return DECORATOR_TYPE;
     }
 
     @Override ${mcc.getMethod("net.minecraft.world.level.levelgen.feature.treedecorators.CocoaDecorator", "place", "LevelSimulatedReader", "java.util.function.BiConsumer<BlockPos, BlockState>", "Random", "List", "List")
-    .replace("this.probability", "0.2F")
-    .replace("Blocks.COCOA.defaultBlockState().setValue(CocoaBlock.AGE,Integer.valueOf(p_161721_.nextInt(3))).setValue(CocoaBlock.FACING,direction)",
-        mappedBlockToBlockStateCode(data.treeFruits))
-    .replace("p_161719_", "level")
-    .replace("p_161720_", "biConsumer")
-    .replace("p_161721_", "random")
-    .replace("p_161722_", "blocks")
-    .replace("p_161723_", "blocks2")}
+        .replace("this.probability", "0.2F")
+        .replace("Blocks.COCOA.defaultBlockState().setValue(CocoaBlock.AGE,Integer.valueOf(p_161721_.nextInt(3))).setValue(CocoaBlock.FACING,direction)", "oriented(" + mappedBlockToBlockStateCode(data.treeFruits) + ", direction1)")
+        .replace("p_161719_", "level")
+        .replace("p_161720_", "biConsumer")
+        .replace("p_161721_", "random")
+        .replace("p_161722_", "blocks")
+        .replace("p_161723_", "blocks2")}
 
+    @SuppressWarnings("deprecation") private static BlockState oriented(BlockState blockstate, Direction direction) {
+        return switch (direction) {
+            case SOUTH -> blockstate.rotate(Rotation.CLOCKWISE_180);
+            case EAST -> blockstate.rotate(Rotation.CLOCKWISE_90);
+            case WEST -> blockstate.rotate(Rotation.COUNTERCLOCKWISE_90);
+            default -> blockstate;
+        };
+    }
 }
 <#-- @formatter:on -->

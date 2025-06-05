@@ -1,7 +1,7 @@
 <#--
  # MCreator (https://mcreator.net/)
  # Copyright (C) 2012-2020, Pylo
- # Copyright (C) 2020-2021, Pylo, opensource contributors
+ # Copyright (C) 2020-2024, Pylo, opensource contributors
  #
  # This program is free software: you can redistribute it and/or modify
  # it under the terms of the GNU General Public License as published by
@@ -29,39 +29,30 @@
 -->
 
 <#-- @formatter:off -->
-
+package ${package}.init;
 /*
  *    MCreator note: This file will be REGENERATED on each build.
  */
+<#assign spawn_overworld = biomes?filter(biome -> biome.spawnBiome)>
 
-package ${package}.init;
+<#if spawn_overworld?has_content>
+@Mod.EventBusSubscriber
+</#if>
+public class ${JavaModName}Biomes {
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD) public class ${JavaModName}Biomes {
-
-    private static final List<Biome> REGISTRY = new ArrayList<>();
+	public static final DeferredRegister<Biome> REGISTRY = DeferredRegister.create(ForgeRegistries.BIOMES, ${JavaModName}.MODID);
 
     <#list biomes as biome>
-    public static Biome ${biome.getModElement().getRegistryNameUpper()}
-        = register("${biome.getModElement().getRegistryName()}", ${biome.getModElement().getName()}Biome.createBiome());
+    public static final RegistryObject<Biome> ${biome.getModElement().getRegistryNameUpper()}
+        = REGISTRY.register("${biome.getModElement().getRegistryName()}", ${biome.getModElement().getName()}Biome::createBiome);
     </#list>
 
-    private static Biome register(String registryname, Biome biome) {
-		REGISTRY.add(biome.setRegistryName(new ResourceLocation(${JavaModName}.MODID, registryname)));
-    	return biome;
+    <#if spawn_overworld?has_content>
+    @SubscribeEvent public static void init(FMLCommonSetupEvent event) {
+    <#list spawn_overworld as biome>
+    	${biome.getModElement().getName()}Biome.init();
+    </#list>
     }
-
-	@SubscribeEvent public static void registerBiomes(RegistryEvent.Register<Biome> event) {
-		event.getRegistry().registerAll(REGISTRY.toArray(new Biome[0]));
-	}
-
-	@SubscribeEvent public static void init(FMLCommonSetupEvent event) {
-		event.enqueueWork(() -> {
-	    <#list biomes as biome>
-            ${biome.getModElement().getName()}Biome.init();
-        </#list>
-		});
-	}
-
+    </#if>
 }
-
 <#-- @formatter:on -->

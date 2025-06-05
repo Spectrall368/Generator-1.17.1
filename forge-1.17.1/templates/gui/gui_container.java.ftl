@@ -30,11 +30,7 @@
 <#-- @formatter:off -->
 <#include "../mcitems.ftl">
 <#include "../procedures.java.ftl">
-
-<#assign mx = (data.W - data.width) / 2>
-<#assign my = (data.H - data.height) / 2>
 <#assign slotnum = 0>
-
 package ${package}.world.inventory;
 
 import ${package}.${JavaModName};
@@ -49,15 +45,19 @@ public class ${name}Menu extends AbstractContainerMenu implements Supplier<Map<I
 	public final Level world;
 	public final Player entity;
 	public int x, y, z;
+	private ContainerLevelAccess access = ContainerLevelAccess.NULL;
 
 	private IItemHandler internal;
 
 	private final Map<Integer, Slot> customSlots = new HashMap<>();
 
 	private boolean bound = false;
+	private Supplier<Boolean> boundItemMatcher = null;
+	private Entity boundEntity = null;
+	private BlockEntity boundBlockEntity = null;
 
 	public ${name}Menu(int id, Inventory inv, FriendlyByteBuf extraData) {
-		super(${JavaModName}Menus.${data.getModElement().getRegistryNameUpper()}, id);
+		super(${JavaModName}Menus.${data.getModElement().getRegistryNameUpper()}.get(), id);
 
 		this.entity = inv.player;
 		this.world = inv.player.level;
@@ -70,37 +70,34 @@ public class ${name}Menu extends AbstractContainerMenu implements Supplier<Map<I
 			this.x = pos.getX();
 			this.y = pos.getY();
 			this.z = pos.getZ();
+			access = ContainerLevelAccess.create(world, pos);
 		}
 
 		<#if data.type == 1>
 			if (pos != null) {
 				if (extraData.readableBytes() == 1) { // bound to item
 					byte hand = extraData.readByte();
-					ItemStack itemstack;
-					if(hand == 0)
-						itemstack = this.entity.getMainHandItem();
-					else
-						itemstack = this.entity.getOffhandItem();
+					ItemStack itemstack = hand == 0 ? this.entity.getMainHandItem() : this.entity.getOffhandItem();
+					this.boundItemMatcher = () -> itemstack == (hand == 0 ? this.entity.getMainHandItem() : this.entity.getOffhandItem());
 					itemstack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(capability -> {
 						this.internal = capability;
 						this.bound = true;
 					});
-				} else if (extraData.readableBytes() > 1) {
+				} else if (extraData.readableBytes() > 1) { // bound to entity
 					extraData.readByte(); // drop padding
-					Entity entity = world.getEntity(extraData.readVarInt());
-					if(entity != null)
-						entity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(capability -> {
+					boundEntity = world.getEntity(extraData.readVarInt());
+					if(boundEntity != null)
+						boundEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(capability -> {
 							this.internal = capability;
 							this.bound = true;
 						});
 				} else { // might be bound to block
-					BlockEntity ent = inv.player != null ? inv.player.level.getBlockEntity(pos) : null;
-					if (ent != null) {
-						ent.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(capability -> {
+					boundBlockEntity = this.world.getBlockEntity(pos);
+					if (boundBlockEntity != null)
+						boundBlockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(capability -> {
 							this.internal = capability;
 							this.bound = true;
 						});
-					}
 				}
 			}
 
@@ -108,14 +105,17 @@ public class ${name}Menu extends AbstractContainerMenu implements Supplier<Map<I
 				<#if component.getClass().getSimpleName()?ends_with("Slot")>
 					<#assign slotnum += 1>
         	    this.customSlots.put(${component.id}, this.addSlot(new SlotItemHandler(internal, ${component.id},
-					${(component.x - mx)?int + 1},
-					${(component.y - my)?int + 1}) {
+						${component.gx(data.width) + 1},
+						${component.gy(data.height) + 1}) {
+						private final int slot = ${component.id}; <#-- #5209, this is needed for procedure dependencies -->
+						private int x = ${name}Menu.this.x; <#-- #5239 - x and y provided by slot are in-GUI, not in-world coordinates -->
+ 						private int y = ${name}Menu.this.y;
 
-        	    	<#if component.disableStackInteraction>
-					@Override public boolean mayPickup(Player player) {
-						return false;
+					<#if hasProcedure(component.disablePickup) || component.disablePickup.getFixedValue()>
+					@Override public boolean mayPickup(Player entity) {
+						return <@procedureOBJToConditionCode component.disablePickup false true/>;
 					}
-        	    	</#if>
+					</#if>
 
 					<#if hasProcedure(component.onSlotChanged)>
         	        @Override public void setChanged() {
@@ -138,18 +138,23 @@ public class ${name}Menu extends AbstractContainerMenu implements Supplier<Map<I
 					}
 					</#if>
 
-					<#if component.disableStackInteraction>
-						@Override public boolean mayPlace(ItemStack stack) {
-							return false;
-						}
-        	        <#elseif component.getClass().getSimpleName() == "InputSlot">
-						<#if component.inputLimit.toString()?has_content>
-        	             @Override public boolean mayPlace(ItemStack stack) {
-							 return (${mappedMCItemToItem(component.inputLimit)} == stack.getItem());
-						 }
+					<#if component.getClass().getSimpleName() == "InputSlot">
+						<#if hasProcedure(component.disablePlacement) || component.disablePlacement.getFixedValue()>
+							@Override public boolean mayPlace(ItemStack itemstack) {
+								return <@procedureOBJToConditionCode component.disablePlacement false true/>;
+							}
+						<#elseif component.inputLimit.toString()?has_content>
+							@Override public boolean mayPlace(ItemStack stack) {
+								<#if component.inputLimit.getUnmappedValue().startsWith("TAG:")>
+										<#assign tag = "\"" + component.inputLimit.getUnmappedValue().replace("TAG:", "").replace("mod:", modid + ":") + "\"">
+									return stack.is(ItemTags.create(new ResourceLocation(${tag})));
+								<#else>
+									return ${mappedMCItemToItem(component.inputLimit)} == stack.getItem();
+								</#if>
+							}
 						</#if>
 					<#elseif component.getClass().getSimpleName() == "OutputSlot">
-        	            @Override public boolean mayPlace(ItemStack stack) {
+						@Override public boolean mayPlace(ItemStack stack) {
 							return false;
 						}
 					</#if>
@@ -157,12 +162,12 @@ public class ${name}Menu extends AbstractContainerMenu implements Supplier<Map<I
 				</#if>
 			</#list>
 
-			<#assign coffx = ((data.width - 176) / 2 + data.inventoryOffsetX)?int>
-			<#assign coffy = ((data.height - 166) / 2 + data.inventoryOffsetY)?int>
+			<#assign coffx = data.getInventorySlotsX()>
+			<#assign coffy = data.getInventorySlotsY()>
 
 			for (int si = 0; si < 3; ++si)
 				for (int sj = 0; sj < 9; ++sj)
-					this.addSlot(new Slot(inv, sj + (si + 1) * 9, ${coffx} + 8 + sj * 18, ${coffy}+ 84 + si * 18));
+					this.addSlot(new Slot(inv, sj + (si + 1) * 9, ${coffx} + 8 + sj * 18, ${coffy} + 84 + si * 18));
 
 			for (int si = 0; si < 9; ++si)
 				this.addSlot(new Slot(inv, si, ${coffx} + 8 + si * 18, ${coffy} + 142));
@@ -174,6 +179,14 @@ public class ${name}Menu extends AbstractContainerMenu implements Supplier<Map<I
 	}
 
 	@Override public boolean stillValid(Player player) {
+		if (this.bound) {
+			if (this.boundItemMatcher != null)
+				return this.boundItemMatcher.get();
+			else if (this.boundBlockEntity != null)
+				return AbstractContainerMenu.stillValid(this.access, player, this.boundBlockEntity.getBlockState().getBlock());
+			else if (this.boundEntity != null)
+				return this.boundEntity.isAlive();
+		}
 		return true;
 	}
 
@@ -239,7 +252,9 @@ public class ${name}Menu extends AbstractContainerMenu implements Supplier<Map<I
 								if(j == ${component.id}) continue;
 							</#if>
 						</#list>
-						playerIn.drop(internal.extractItem(j, internal.getStackInSlot(j).getCount(), false), false);
+						playerIn.drop(internal.getStackInSlot(j), false);
+ 						if (internal instanceof IItemHandlerModifiable ihm)
+ 							ihm.setStackInSlot(j, ItemStack.EMPTY);
 					}
 				} else {
 					for(int i = 0; i < internal.getSlots(); ++i) {
@@ -248,7 +263,9 @@ public class ${name}Menu extends AbstractContainerMenu implements Supplier<Map<I
 								if(i == ${component.id}) continue;
 							</#if>
 						</#list>
-						playerIn.getInventory().placeItemBackInInventory(internal.extractItem(i, internal.getStackInSlot(i).getCount(), false));
+						playerIn.getInventory().placeItemBackInInventory(internal.getStackInSlot(i));
+ 						if (internal instanceof IItemHandlerModifiable ihm)
+ 							ihm.setStackInSlot(i, ItemStack.EMPTY);
 					}
 				}
 			}

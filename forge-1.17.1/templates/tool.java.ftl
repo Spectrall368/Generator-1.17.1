@@ -32,13 +32,10 @@
 <#include "mcitems.ftl">
 <#include "procedures.java.ftl">
 <#include "triggers.java.ftl">
-
 package ${package}.item;
 
-import net.minecraft.world.entity.ai.attributes.Attributes;
-
 <#if data.toolType == "Pickaxe" || data.toolType == "Axe" || data.toolType == "Sword" || data.toolType == "Spade"
-		|| data.toolType == "Hoe" || data.toolType == "Shears" || data.toolType == "MultiTool">
+		|| data.toolType == "Hoe" || data.toolType == "Shears" || data.toolType == "Shield" || data.toolType == "MultiTool">
 public class ${name}Item extends ${data.toolType?replace("Spade", "Shovel")?replace("MultiTool", "Tiered")}Item {
 	public ${name}Item () {
 		super(<#if data.toolType == "Pickaxe" || data.toolType == "Axe" || data.toolType == "Sword"
@@ -53,11 +50,27 @@ public class ${name}Item extends ${data.toolType?replace("Spade", "Shovel")?repl
 				}
 
    				public float getAttackDamageBonus() {
+					<#if data.toolType == "Sword">
+					return ${data.damageVsEntity - 4}f;
+					<#elseif data.toolType == "Hoe">
+					return ${data.damageVsEntity - 1}f;
+					<#else>
 					return ${data.damageVsEntity - 2}f;
+					</#if>
 				}
 
    				public int getLevel() {
-					return ${data.harvestLevel};
+					<#if data.blockDropsTier == "WOOD" || data.blockDropsTier == "GOLD">
+ 					return 0;
+ 					<#elseif data.blockDropsTier == "STONE">
+ 					return 1;
+ 					<#elseif data.blockDropsTier == "IRON">
+ 					return 2;
+ 					<#elseif data.blockDropsTier == "DIAMOND">
+ 					return 3;
+ 					<#else>
+ 					return 4;
+ 					</#if>
 				}
 
    				public int getEnchantmentValue() {
@@ -65,15 +78,7 @@ public class ${name}Item extends ${data.toolType?replace("Spade", "Shovel")?repl
 				}
 
    				public Ingredient getRepairIngredient() {
-					<#if data.repairItems?has_content>
-					return Ingredient.of(
-						<#list data.repairItems as repairItem>
-						${mappedMCItemToItemStackCode(repairItem,1)}<#sep>,
-						</#list>
-					);
-					<#else>
-					return Ingredient.EMPTY;
-					</#if>
+					return ${mappedMCItemsToIngredient(data.repairItems)};
 				}
 			},
 
@@ -82,21 +87,34 @@ public class ${name}Item extends ${data.toolType?replace("Spade", "Shovel")?repl
 			</#if>
 
 				new Item.Properties()
-			 	.tab(${data.creativeTab})
+			 	.tab(<@CreativeTabs data.creativeTabs/>)
 			 	<#if data.immuneToFire>
 			 	.fireResistant()
 			 	</#if>
-		<#elseif data.toolType=="Shears">
+		<#elseif data.toolType == "Shears" || data.toolType == "Shield">
 			new Item.Properties()
-				.tab(${data.creativeTab})
+				.tab(<@CreativeTabs data.creativeTabs/>)
 				.durability(${data.usageCount})
 				<#if data.immuneToFire>
 				.fireResistant()
 				</#if>
 		</#if>);
-
-		setRegistryName("${registryname}");
 	}
+
+	<#if hasProcedure(data.additionalDropCondition)>
+ 	@Override public boolean isCorrectToolForDrops(ItemStack itemstack, BlockState blockstate) {
+ 		return super.isCorrectToolForDrops(itemstack, blockstate) && <@procedureCode data.additionalDropCondition, {
+ 			"itemstack": "itemstack",
+ 			"blockstate": "blockstate"
+ 		}, false/>;
+ 	}
+ 	</#if>
+
+	<#if data.toolType == "Shield" && data.repairItems?has_content>
+	@Override public boolean isValidRepairItem(ItemStack itemstack, ItemStack repairitem) {
+		return ${mappedMCItemsToIngredient(data.repairItems)}.test(repairitem);
+	}
+	</#if>
 
 	<#if data.toolType=="Shears">
 		@Override public int getEnchantmentValue() {
@@ -108,19 +126,15 @@ public class ${name}Item extends ${data.toolType?replace("Spade", "Shovel")?repl
     	}
 	<#elseif data.toolType=="MultiTool">
 		@Override public boolean isCorrectToolForDrops(BlockState blockstate) {
-			int tier = ${data.harvestLevel};
-			if (tier < 3 && blockstate.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-				return false;
-			} else if (tier < 2 && blockstate.is(BlockTags.NEEDS_IRON_TOOL)) {
-				return false;
-			} else {
-				return tier < 1 && blockstate.is(BlockTags.NEEDS_STONE_TOOL) ? false : (
-								blockstate.is(BlockTags.MINEABLE_WITH_AXE) ||
-								blockstate.is(BlockTags.MINEABLE_WITH_HOE) ||
-								blockstate.is(BlockTags.MINEABLE_WITH_PICKAXE) ||
-								blockstate.is(BlockTags.MINEABLE_WITH_SHOVEL)
-						);
-			}
+			<#if data.blockDropsTier == "WOOD" || data.blockDropsTier == "GOLD">
+ 			return !blockstate.is(BlockTags.NEEDS_STONE_TOOL) && !blockstate.is(BlockTags.NEEDS_IRON_TOOL) && !blockstate.is(BlockTags.NEEDS_DIAMOND_TOOL);
+ 			<#elseif data.blockDropsTier == "STONE">
+ 			return !blockstate.is(BlockTags.NEEDS_IRON_TOOL) && !blockstate.is(BlockTags.NEEDS_DIAMOND_TOOL);
+ 			<#elseif data.blockDropsTier == "IRON">
+ 			return !blockstate.is(BlockTags.NEEDS_DIAMOND_TOOL);
+ 			<#else>
+ 			return blockstate.is(BlockTags.MINEABLE_WITH_AXE) || blockstate.is(BlockTags.MINEABLE_WITH_HOE) || blockstate.is(BlockTags.MINEABLE_WITH_PICKAXE) || blockstate.is(BlockTags.MINEABLE_WITH_SHOVEL);
+ 			</#if>
 		}
 
 		@Override public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
@@ -139,7 +153,7 @@ public class ${name}Item extends ${data.toolType?replace("Spade", "Shovel")?repl
 			if (equipmentSlot == EquipmentSlot.MAINHAND) {
 				ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
 				builder.putAll(super.getDefaultAttributeModifiers(equipmentSlot));
-				builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", ${data.damageVsEntity - 2}f, AttributeModifier.Operation.ADDITION));
+				builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", ${data.damageVsEntity - 1}f, AttributeModifier.Operation.ADDITION));
 				builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Tool modifier", ${data.attackSpeed - 4}, AttributeModifier.Operation.ADDITION));
 				return builder.build();
 			}
@@ -168,28 +182,22 @@ public class ${name}Item extends Item {
 
     public ${name}Item() {
 	    super(new Item.Properties()
-		    .tab(${data.creativeTab})
+		    .tab(<@CreativeTabs data.creativeTabs/>)
 			.durability(${data.usageCount})
 			<#if data.immuneToFire>
 			.fireResistant()
 			</#if>
 		);
-
-		setRegistryName("${registryname}");
 	}
 
 	@Override public float getDestroySpeed(ItemStack itemstack, BlockState blockstate) {
-    	return List.of(
-			<#list data.blocksAffected as restrictionBlock>
-			${mappedBlockToBlock(restrictionBlock)}<#sep>,
-			</#list>
-		).contains(blockstate.getBlock()) ? ${data.efficiency}f : 1;
-	}
+        return ${containsAnyOfBlocks(data.blocksAffected "blockstate")} ? ${data.efficiency}f : 1;
+    }
 
 	<@onBlockDestroyedWith data.onBlockDestroyedWithTool, true/>
 
 	<@onEntityHitWith data.onEntityHitWith, true/>
-	
+
 	<@onRightClickedInAir data.onRightClickedInAir/>
 
 	@Override public int getEnchantmentValue() {
@@ -200,7 +208,7 @@ public class ${name}Item extends Item {
 		if (equipmentSlot == EquipmentSlot.MAINHAND) {
 			ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
 			builder.putAll(super.getDefaultAttributeModifiers(equipmentSlot));
-			builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", ${data.damageVsEntity - 2}f, AttributeModifier.Operation.ADDITION));
+			builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", ${data.damageVsEntity - 1}f, AttributeModifier.Operation.ADDITION));
 			builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Tool modifier", ${data.attackSpeed - 4}, AttributeModifier.Operation.ADDITION));
 			return builder.build();
 		}
@@ -215,25 +223,19 @@ public class ${name}Item extends FishingRodItem {
 
 	public ${name}Item() {
 		super(new Item.Properties()
-			.tab(${data.creativeTab})
+			.tab(<@CreativeTabs data.creativeTabs/>)
 			.durability(${data.usageCount})
 			<#if data.immuneToFire>
 			.fireResistant()
 			</#if>
 		);
-
-		setRegistryName("${registryname}");
 	}
 
 	<#if data.repairItems?has_content>
-	@Override public boolean isValidRepairItem(ItemStack itemstack, ItemStack repairitem) {
-		return List.of(
-			<#list data.repairItems as repairItem>
-				${mappedMCItemToItem(repairItem)}<#sep>,
-				</#list>
-		).contains(repairitem.getItem());
-	}
-	</#if>
+    	@Override public boolean isValidRepairItem(ItemStack itemstack, ItemStack repairitem) {
+			return ${mappedMCItemsToIngredient(data.repairItems)}.test(repairitem);
+    	}
+    </#if>
 
 	@Override public int getEnchantmentValue() {
 		return ${data.enchantability};
@@ -260,8 +262,8 @@ public class ${name}Item extends FishingRodItem {
 
 					@Override public boolean shouldStopFishing(Player player) {
 						if (!player.isRemoved() && player.isAlive() &&
-								(player.getMainHandItem().is(${JavaModName}Items.${data.getModElement().getRegistryNameUpper()}) ||
-								player.getOffhandItem().is(${JavaModName}Items.${data.getModElement().getRegistryNameUpper()}))
+								(player.getMainHandItem().is(${JavaModName}Items.${data.getModElement().getRegistryNameUpper()}.get()) ||
+								player.getOffhandItem().is(${JavaModName}Items.${data.getModElement().getRegistryNameUpper()}.get()))
 								&& !(this.distanceToSqr(player) > 1024)) {
 							return false;
 						} else {
@@ -294,7 +296,6 @@ public class ${name}Item extends FishingRodItem {
     <@commonMethods/>
 }
 </#if>
-
 <#macro commonMethods>
 	<#if data.stayInGridWhenCrafting>
         @Override public boolean hasContainerItem(ItemStack stack) {
@@ -327,14 +328,7 @@ public class ${name}Item extends FishingRodItem {
         </#if>
     </#if>
 
-    <#if data.specialInfo?has_content>
-    	@Override public void appendHoverText(ItemStack itemstack, Level world, List<Component> list, TooltipFlag flag) {
-    		super.appendHoverText(itemstack, world, list, flag);
-    		<#list data.specialInfo as entry>
-    		list.add(new TextComponent("${JavaConventions.escapeStringForJava(entry)}"));
-    		</#list>
-    	}
-    </#if>
+	<@addSpecialInformation data.specialInformation, "item." + modid + "." + registryname/>
 
     <@onItemUsedOnBlock data.onRightClickedOnBlock/>
 
@@ -342,12 +336,8 @@ public class ${name}Item extends FishingRodItem {
 
 	<@onEntitySwing data.onEntitySwing/>
 
-	<@onStoppedUsing data.onStoppedUsing/>
-
 	<@onItemTick data.onItemInUseTick, data.onItemInInventoryTick/>
 
-    <#if data.hasGlow>
 	<@hasGlow data.glowCondition/>
-    </#if>
 </#macro>
 <#-- @formatter:on -->

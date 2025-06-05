@@ -1,4 +1,5 @@
 <#-- @formatter:off -->
+<#-- now in dimension: surface and underground block -->
 {
     "scale": ${data.heightVariation},
     "depth": ${data.baseHeight},
@@ -6,8 +7,7 @@
     "temperature": ${data.temperature},
     "downfall": ${data.rainingPossibility},
     "category": "none",
-	"surface_builder": "${modid}:${registryname}",
-	"spawn_costs": {},
+    "surface_builder": "${modid}:${registryname}",
     "player_spawn_friendly": true,
     "effects": {
     	"foliage_color": ${data.foliageColor?has_content?then(data.foliageColor.getRGB(), 10387789)},
@@ -25,6 +25,7 @@
 		"water_ambient": [],
 		"misc": []
 	},
+	"spawn_costs": {},
     "carvers": {
 		<#if data.defaultFeatures?contains("Caves")>
     	"air": [
@@ -36,7 +37,7 @@
     "features": [
     	<#--RAW_GENERATION-->[],
 		<#--LAKES-->[
-		<#if data.defaultFeatures?contains("Lakes")>
+		<#if data.defaultFeatures?contains("Caves")>
 			"minecraft:lake_water",
 			"minecraft:lake_lava"
 		</#if>
@@ -76,7 +77,6 @@
 		</#list>
     ]
 }
-
 <#function listStructures>
 	<#assign retval = []>
 	<#if data.spawnWoodlandMansion><#assign retval = retval + ["minecraft:mansion"] /></#if>
@@ -93,15 +93,14 @@
 	<#if data.spawnJungleTemple><#assign retval = retval + ["minecraft:jungle_pyramid"] /></#if>
 	<#if data.spawnIgloo><#assign retval = retval + ["minecraft:igloo"] /></#if>
 	<#if data.spawnBuriedTreasure><#assign retval = retval + ["minecraft:buried_treasure"] /></#if>
-	<#if data.spawnNetherBridge><#assign retval = retval + ["minecraft:buried_treasure"] /></#if>
-	<#if data.spawnNetherFossil><#assign retval = retval + ["minecraft:buried_treasure"] /></#if>
-	<#if data.spawnBastionRemnant><#assign retval = retval + ["minecraft:buried_treasure"] /></#if>
-	<#if data.spawnEndCity><#assign retval = retval + ["minecraft:buried_treasure"] /></#if>
+	<#if data.spawnNetherBridge><#assign retval = retval + ["minecraft:fortress"] /></#if>
+	<#if data.spawnNetherFossil><#assign retval = retval + ["minecraft:nether_fossil"] /></#if>
+	<#if data.spawnBastionRemnant><#assign retval = retval + ["minecraft:bastion_remnant"] /></#if>
+	<#if data.spawnEndCity><#assign retval = retval + ["minecraft:endcity"] /></#if>
 	<#if data.spawnRuinedPortal != "NONE"><#assign retval = retval + ["minecraft:ruined_portal_${data.spawnRuinedPortal?lower_case}"] /></#if>
 	<#if data.villageType != "none"><#assign retval = retval + ["minecraft:village_${data.villageType}"] /></#if>
 	<#return retval>
 </#function>
-
 <#function getEntitiesOfType entityList type>
 	<#assign retval = []>
 	<#list entityList as entity>
@@ -111,13 +110,12 @@
 	</#list>
 	<#return retval>
 </#function>
-
 <#macro generateEntityList entityList type>
 	<#assign entities = getEntitiesOfType(entityList, type)>
 	<#list entities as entry>
 	<#-- @formatter:off -->
     {
-		"type": "${entry.entity}",
+		"type": "${entry.entity.getMappedValue(2)}",
 		"weight": ${entry.weight},
 		"minCount": ${entry.minGroup},
 		"maxCount": ${entry.maxGroup}

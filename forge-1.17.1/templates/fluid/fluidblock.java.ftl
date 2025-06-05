@@ -30,15 +30,13 @@
 <#-- @formatter:off -->
 <#include "../procedures.java.ftl">
 <#include "../triggers.java.ftl">
-
 package ${package}.block;
 
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 
 public class ${name}Block extends LiquidBlock {
 	public ${name}Block() {
-		super(${JavaModName}Fluids.${data.getModElement().getRegistryNameUpper()},
+		super(() -> (FlowingFluid) ${JavaModName}Fluids.${data.getModElement().getRegistryNameUpper()}.get(),
 			<#if generator.map(data.colorOnMap, "mapcolors") != "DEFAULT">
 			BlockBehaviour.Properties.of(Material.${data.type}, MaterialColor.${generator.map(data.colorOnMap, "mapcolors")})
 			<#else>
@@ -48,7 +46,6 @@ public class ${name}Block extends LiquidBlock {
 			<#if data.emissiveRendering>.hasPostProcess((bs, br, bp) -> true).emissiveRendering((bs, br, bp) -> true)</#if>
 			<#if data.luminance != 0>.lightLevel(s -> ${data.luminance})</#if>
 		);
-		setRegistryName("${registryname}");
 	}
 
 	<#if data.flammability != 0>
@@ -73,11 +70,11 @@ public class ${name}Block extends LiquidBlock {
 	}
 	</#if>
 
-	<@onBlockAdded data.onBlockAdded, hasProcedure(data.onTickUpdate) && (data.tickRate > 0), data.tickRate/>
+	<@onBlockAdded data.onBlockAdded, hasProcedure(data.onTickUpdate) && data.tickRate gt 0, data.tickRate/>
 
 	<@onRedstoneOrNeighborChanged "", "", data.onNeighbourChanges/>
 
-	<@onBlockTick data.onTickUpdate, (data.tickRate > 0), data.tickRate/>
+	<@onBlockTick data.onTickUpdate, data.tickRate gt 0, data.tickRate/>
 
 	<@onEntityCollides data.onEntityCollides/>
 

@@ -1,6 +1,49 @@
 <#include "procedures.java.ftl">
 
 <#-- Item-related triggers -->
+<#macro CreativeTabs tabs="">
+<#assign CustomTabs = JavaModName + "Tabs">
+	<#if tabs == "[]">
+	null
+	<#elseif tabs?contains(CustomTabs)>
+	${CustomTabs}${tabs?keep_after_last(CustomTabs)?replace("]", "")}
+	<#else>
+	CreativeModeTab${tabs?keep_after_last("CreativeModeTab")?replace("]", "")}
+	</#if>
+</#macro>
+
+<#macro addSpecialInformation procedure="" translationKeyHeader="" isBlock=false>
+	<#if procedure?has_content && (hasProcedure(procedure) || !procedure.getFixedValue().isEmpty())>
+		@Override public void appendHoverText(ItemStack itemstack, <#if isBlock>BlockGetter<#else>Level</#if> level, List<Component> list, TooltipFlag flag) {
+		super.appendHoverText(itemstack, level, list, flag);
+		<#if hasProcedure(procedure)>
+			Entity entity = itemstack.getEntityRepresentation();
+			String hoverText = <@procedureCode procedure, {
+ 				"x": "entity != null ? entity.getX() : 0.0",
+ 				"y": "entity != null ? entity.getY() : 0.0",
+ 				"z": "entity != null ? entity.getZ() : 0.0",
+ 				"entity": "entity",
+ 				"world": "level instanceof Level ? (LevelAccessor) level : null",
+ 				"itemstack": "itemstack"
+ 			}, false/>;
+ 			if (hoverText != null) {
+ 				for (String line : hoverText.split("\n")) {
+ 					list.add(new TextComponent(line));
+ 				}
+ 			}
+		<#elseif translationKeyHeader?has_content>
+ 			<#list procedure.getFixedValue() as entry>
+ 				list.add(new TranslatableComponent("${translationKeyHeader}.description_${entry?index}"));
+ 			</#list>
+		<#else>
+			<#list procedure.getFixedValue() as entry>
+				list.add(new TextComponent("${JavaConventions.escapeStringForJava(entry)}"));
+			</#list>
+		</#if>
+		}
+	</#if>
+</#macro>
+
 <#macro onEntitySwing procedure="">
 <#if hasProcedure(procedure)>
 @Override public boolean onEntitySwing(ItemStack itemstack, LivingEntity entity) {
@@ -34,27 +77,11 @@
 </#if>
 </#macro>
 
-<#macro onStoppedUsing procedure="">
-<#if hasProcedure(procedure)>
-@Override public void releaseUsing(ItemStack itemstack, Level world, LivingEntity entity, int time) {
-	<@procedureCode data.onStoppedUsing, {
-		"x": "entity.getX()",
-		"y": "entity.getY()",
-		"z": "entity.getZ()",
-		"world": "world",
-		"entity": "entity",
-		"itemstack": "itemstack",
-		"time": "time"
-	}/>
-}
-</#if>
-</#macro>
-
-<#macro onEntityHitWith procedure="" hurtStack=false>
+<#macro onEntityHitWith procedure="" hurtStack=false hurtStackAmount=2>
 <#if hasProcedure(procedure) || hurtStack>
 @Override public boolean hurtEnemy(ItemStack itemstack, LivingEntity entity, LivingEntity sourceentity) {
 	<#if hurtStack>
-		itemstack.hurtAndBreak(2, entity, i -> i.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+		itemstack.hurtAndBreak(${hurtStackAmount}, entity, i -> i.broadcastBreakEvent(EquipmentSlot.MAINHAND));
 	<#else>
 		boolean retval = super.hurtEnemy(itemstack, entity, sourceentity);
 	</#if>
@@ -181,24 +208,26 @@
 </#macro>
 
 <#macro hasGlow procedure="">
+<#if procedure?has_content && (hasProcedure(procedure) || procedure.getFixedValue())>
 @Override @OnlyIn(Dist.CLIENT) public boolean isFoil(ItemStack itemstack) {
-   	<#if hasProcedure(procedure)>
-    <#assign dependencies = procedure.getDependencies(generator.getWorkspace())>
-    <#if !(dependencies.isEmpty() || (dependencies.size() == 1 && dependencies.get(0).getName() == "itemstack"))>
-   	Entity entity = Minecraft.getInstance().player;
-   	</#if>
-   	return <@procedureCode procedure, {
-		"x": "entity.getX()",
-		"y": "entity.getY()",
-		"z": "entity.getZ()",
-		"entity": "entity",
-		"world": "entity.level",
-		"itemstack": "itemstack"
-   	}/>
+	<#if hasProcedure(procedure)>
+		<#assign dependencies = procedure.getDependencies(generator.getWorkspace())>
+		<#if !(dependencies.isEmpty() || (dependencies.size() == 1 && dependencies.get(0).getName() == "itemstack"))>
+		Entity entity = Minecraft.getInstance().player;
+		</#if>
+		return <@procedureCode procedure, {
+			"x": "entity.getX()",
+			"y": "entity.getY()",
+			"z": "entity.getZ()",
+			"entity": "entity",
+			"world": "entity.level",
+			"itemstack": "itemstack"
+		}/>
 	<#else>
-   	return true;
+		return true;
 	</#if>
 }
+</#if>
 </#macro>
 
 <#-- Armor triggers -->
@@ -217,6 +246,24 @@
 </#if>
 </#macro>
 
+<#macro piglinNeutral procedure="">
+<#if procedure?has_content && (hasProcedure(procedure) || procedure.getFixedValue())>
+@Override public boolean makesPiglinsNeutral(ItemStack itemstack, LivingEntity entity) {
+	<#if hasProcedure(procedure)>
+		return <@procedureCode procedure, {
+			"x": "entity.getX()",
+			"y": "entity.getY()",
+			"z": "entity.getZ()",
+			"world": "entity.level",
+			"entity": "entity",
+			"itemstack": "itemstack"
+		}/>
+	<#else>
+		return true;
+	</#if>
+}
+</#if>
+</#macro>
 
 <#-- Block-related triggers -->
 <#macro onDestroyedByPlayer procedure="">
@@ -224,12 +271,12 @@
 @Override public boolean removedByPlayer(BlockState blockstate, Level world, BlockPos pos, Player entity, boolean willHarvest, FluidState fluid) {
 	boolean retval = super.removedByPlayer(blockstate, world, pos, entity, willHarvest, fluid);
 	<@procedureCode procedure, {
-		"x": "pos.getX()",
-		"y": "pos.getY()",
-		"z": "pos.getZ()",
-		"world": "world",
-		"entity": "entity",
-		"blockstate": "blockstate"
+	"x": "pos.getX()",
+	"y": "pos.getY()",
+	"z": "pos.getZ()",
+	"world": "world",
+	"entity": "entity",
+	"blockstate": "blockstate"
 	}/>
 	return retval;
 }
@@ -241,10 +288,10 @@
 @Override public void wasExploded(Level world, BlockPos pos, Explosion e) {
 	super.wasExploded(world, pos, e);
 	<@procedureCode procedure, {
-		"x": "pos.getX()",
-		"y": "pos.getY()",
-		"z": "pos.getZ()",
-		"world": "world"
+	"x": "pos.getX()",
+	"y": "pos.getY()",
+	"z": "pos.getZ()",
+	"world": "world"
 	}/>
 }
 </#if>
@@ -255,12 +302,12 @@
 @Override public void entityInside(BlockState blockstate, Level world, BlockPos pos, Entity entity) {
 	super.entityInside(blockstate, world, pos, entity);
 	<@procedureCode procedure, {
-		"x": "pos.getX()",
-		"y": "pos.getY()",
-		"z": "pos.getZ()",
-		"world": "world",
-		"entity": "entity",
-		"blockstate": "blockstate"
+	"x": "pos.getX()",
+	"y": "pos.getY()",
+	"z": "pos.getZ()",
+	"world": "world",
+	"entity": "entity",
+	"blockstate": "blockstate"
 	}/>
 }
 </#if>
@@ -275,13 +322,13 @@
 	</#if>
 	<#if hasProcedure(procedure)>
 		<@procedureCode procedure, {
-			"x": "pos.getX()",
-			"y": "pos.getY()",
-			"z": "pos.getZ()",
-			"world": "world",
-			"blockstate": "blockstate",
-			"oldState": "oldState",
-			"moving": "moving"
+		"x": "pos.getX()",
+		"y": "pos.getY()",
+		"z": "pos.getZ()",
+		"world": "world",
+		"blockstate": "blockstate",
+		"oldState": "oldState",
+		"moving": "moving"
 		}/>
 	</#if>
 }
@@ -293,12 +340,12 @@
 @Override public void stepOn(Level world, BlockPos pos, BlockState blockstate, Entity entity) {
 	super.stepOn(world, pos, blockstate, entity);
 	<@procedureCode procedure, {
-		"x": "pos.getX()",
-		"y": "pos.getY()",
-		"z": "pos.getZ()",
-		"world": "world",
-		"entity": "entity",
-		"blockstate": "blockstate"
+	"x": "pos.getX()",
+	"y": "pos.getY()",
+	"z": "pos.getZ()",
+	"world": "world",
+	"entity": "entity",
+	"blockstate": "blockstate"
 	}/>
 }
 </#if>
@@ -309,13 +356,13 @@
 @Override public void setPlacedBy(Level world, BlockPos pos, BlockState blockstate, LivingEntity entity, ItemStack itemstack) {
 	super.setPlacedBy(world, pos, blockstate, entity, itemstack);
 	<@procedureCode procedure, {
-		"x": "pos.getX()",
-		"y": "pos.getY()",
-		"z": "pos.getZ()",
-		"world": "world",
-		"entity": "entity",
-		"blockstate": "blockstate",
-		"itemstack": "itemstack"
+	"x": "pos.getX()",
+	"y": "pos.getY()",
+	"z": "pos.getZ()",
+	"world": "world",
+	"entity": "entity",
+	"blockstate": "blockstate",
+	"itemstack": "itemstack"
 	}/>
 }
 </#if>
@@ -326,12 +373,12 @@
 @Override public void attack(BlockState blockstate, Level world, BlockPos pos, Player entity) {
 	super.attack(blockstate, world, pos, entity);
 	<@procedureCode procedure, {
-		"x": "pos.getX()",
-		"y": "pos.getY()",
-		"z": "pos.getZ()",
-		"world": "world",
-		"entity": "entity",
-		"blockstate": "blockstate"
+	"x": "pos.getX()",
+	"y": "pos.getY()",
+	"z": "pos.getZ()",
+	"world": "world",
+	"entity": "entity",
+	"blockstate": "blockstate"
 	}/>
 }
 </#if>
@@ -343,35 +390,35 @@
 	super.neighborChanged(blockstate, world, pos, neighborBlock, fromPos, moving);
 	<#if hasProcedure(onRedstoneOn) || hasProcedure(onRedstoneOff)>
 		if (world.getBestNeighborSignal(pos) > 0) {
-			<#if hasProcedure(onRedstoneOn)>
+		<#if hasProcedure(onRedstoneOn)>
 			<@procedureCode onRedstoneOn, {
-				"x": "pos.getX()",
-				"y": "pos.getY()",
-				"z": "pos.getZ()",
-				"world": "world",
-				"blockstate": "blockstate"
+			"x": "pos.getX()",
+			"y": "pos.getY()",
+			"z": "pos.getZ()",
+			"world": "world",
+			"blockstate": "blockstate"
 			}/>
-			</#if>
+		</#if>
 		}
 		<#if hasProcedure(onRedstoneOff)> else {
 			<@procedureCode onRedstoneOff, {
-				"x": "pos.getX()",
-				"y": "pos.getY()",
-				"z": "pos.getZ()",
-				"world": "world",
-				"blockstate": "blockstate"
+			"x": "pos.getX()",
+			"y": "pos.getY()",
+			"z": "pos.getZ()",
+			"world": "world",
+			"blockstate": "blockstate"
 			}/>
 		}
 		</#if>
 	</#if>
 	<#if hasProcedure(onNeighborChanged)>
-	<@procedureCode onNeighborChanged, {
-	   	"x": "pos.getX()",
-	   	"y": "pos.getY()",
-	   	"z": "pos.getZ()",
-	   	"world": "world",
-	   	"blockstate": "blockstate"
-	}/>
+		<@procedureCode onNeighborChanged, {
+		"x": "pos.getX()",
+		"y": "pos.getY()",
+		"z": "pos.getZ()",
+		"world": "world",
+		"blockstate": "blockstate"
+		}/>
 	</#if>
 }
 </#if>
@@ -379,15 +426,15 @@
 
 <#macro onAnimateTick procedure="">
 <#if hasProcedure(procedure)>
-@Override public void animateTick(BlockState blockstate, Level world, BlockPos pos, Random random) {
+@Override @OnlyIn(Dist.CLIENT) public void animateTick(BlockState blockstate, Level world, BlockPos pos, Random random) {
 	super.animateTick(blockstate, world, pos, random);
 	<@procedureCode procedure, {
-	   	"x": "pos.getX()",
-	   	"y": "pos.getY()",
-	   	"z": "pos.getZ()",
-	   	"world": "world",
-	   	"entity": "Minecraft.getInstance().player",
-	   	"blockstate": "blockstate"
+	"x": "pos.getX()",
+	"y": "pos.getY()",
+	"z": "pos.getZ()",
+	"world": "world",
+	"entity": "Minecraft.getInstance().player",
+	"blockstate": "blockstate"
 	}/>
 }
 </#if>
@@ -398,11 +445,11 @@
 @Override public void tick(BlockState blockstate, ServerLevel world, BlockPos pos, Random random) {
 	super.tick(blockstate, world, pos, random);
 	<@procedureCode procedure, {
-		"x": "pos.getX()",
-		"y": "pos.getY()",
-		"z": "pos.getZ()",
-		"world": "world",
-		"blockstate": "blockstate"
+	"x": "pos.getX()",
+	"y": "pos.getY()",
+	"z": "pos.getZ()",
+	"world": "world",
+	"blockstate": "blockstate"
 	}/>
 	<#if scheduleTick>
 	world.getBlockTicks().scheduleTick(pos, this, ${tickRate});
@@ -415,24 +462,24 @@
 <#if hasProcedure(procedure)>
 @Override public InteractionResult use(BlockState blockstate, Level world, BlockPos pos, Player entity, InteractionHand hand, BlockHitResult hit) {
 	super.use(blockstate, world, pos, entity, hand, hit);
-	<@procedureCodeWithOptResult procedure, "actionresulttype",  "InteractionResult.SUCCESS", {
-		"x": "pos.getX()",
-		"y": "pos.getY()",
-		"z": "pos.getZ()",
-		"world": "world",
-		"blockstate": "blockstate",
-		"entity": "entity",
-		"direction": "hit.getDirection()",
-		"hitX": "hit.getLocation().x()",
-		"hitY": "hit.getLocation().y()",
-		"hitZ": "hit.getLocation().z()"
+	<@procedureCodeWithOptResult procedure, "actionresulttype", "InteractionResult.SUCCESS", {
+	"x": "pos.getX()",
+	"y": "pos.getY()",
+	"z": "pos.getZ()",
+	"world": "world",
+	"blockstate": "blockstate",
+	"entity": "entity",
+	"direction": "hit.getDirection()",
+	"hitX": "hit.getLocation().x()",
+	"hitY": "hit.getLocation().y()",
+	"hitZ": "hit.getLocation().z()"
 	}/>
 }
 </#if>
 </#macro>
 
 <#macro onHitByProjectile procedure="">
-	<#if hasProcedure(procedure)>
+<#if hasProcedure(procedure)>
 @Override public void onProjectileHit(Level world, BlockState blockstate, BlockHitResult hit, Projectile entity) {
 	<@procedureCode procedure, {
 	"x": "hit.getBlockPos().getX()",
@@ -447,5 +494,51 @@
 	"hitZ": "hit.getLocation().z()"
 	}/>
 }
+</#if>
+</#macro>
+
+<#macro bonemealEvents isBonemealTargetCondition="" bonemealSuccessCondition="" onBonemealSuccess="">
+@Override public boolean isValidBonemealTarget(BlockGetter worldIn, BlockPos pos, BlockState blockstate, boolean clientSide) {
+	<#if hasProcedure(isBonemealTargetCondition)>
+	if (worldIn instanceof LevelAccessor world) {
+		return <@procedureCode isBonemealTargetCondition, {
+			"x": "pos.getX()",
+			"y": "pos.getY()",
+			"z": "pos.getZ()",
+			"world": "world",
+			"blockstate": "blockstate",
+			"clientSide": "clientSide"
+		}/>
+	}
+	return false;
+	<#else>
+	return true;
 	</#if>
+}
+
+@Override public boolean isBonemealSuccess(Level world, Random random, BlockPos pos, BlockState blockstate) {
+	<#if hasProcedure(bonemealSuccessCondition)>
+	return <@procedureCode bonemealSuccessCondition, {
+		"x": "pos.getX()",
+		"y": "pos.getY()",
+		"z": "pos.getZ()",
+		"world": "world",
+		"blockstate": "blockstate"
+	}/>
+	<#else>
+	return true;
+	</#if>
+}
+
+@Override public void performBonemeal(ServerLevel world, Random random, BlockPos pos, BlockState blockstate) {
+	<#if hasProcedure(onBonemealSuccess)>
+	<@procedureCode onBonemealSuccess, {
+	"x": "pos.getX()",
+	"y": "pos.getY()",
+	"z": "pos.getZ()",
+	"world": "world",
+	"blockstate": "blockstate"
+	}/>
+	</#if>
+}
 </#macro>

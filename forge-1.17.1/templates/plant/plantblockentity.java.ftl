@@ -32,8 +32,9 @@
 package ${package}.block.entity;
 
 public class ${name}BlockEntity extends BlockEntity {
+
 	public ${name}BlockEntity(BlockPos pos, BlockState state) {
-		super(${JavaModName}BlockEntities.${data.getModElement().getRegistryNameUpper()}, pos, state);
+		super(${JavaModName}BlockEntities.${data.getModElement().getRegistryNameUpper()}.get(), pos, state);
 	}
 
 	@Override public ClientboundBlockEntityDataPacket getUpdatePacket() {
@@ -43,5 +44,6 @@ public class ${name}BlockEntity extends BlockEntity {
 	@Override public CompoundTag getUpdateTag() {
 		return this.save(new CompoundTag());
 	}
+
 }
 <#-- @formatter:on -->

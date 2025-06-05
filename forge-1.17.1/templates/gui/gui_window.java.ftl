@@ -1,6 +1,7 @@
 <#--
  # MCreator (https://mcreator.net/)
  # Copyright (C) 2020 Pylo and contributors
+ # Copyright (C) 2020-2023, Pylo, opensource contributors
  # 
  # This program is free software: you can redistribute it and/or modify
  # it under the terms of the GNU General Public License as published by
@@ -29,12 +30,7 @@
 
 <#-- @formatter:off -->
 <#include "../procedures.java.ftl">
-<#include "../tokens.ftl">
-
 package ${package}.client.gui;
-
-<#assign mx = data.W - data.width>
-<#assign my = data.H - data.height>
 
 public class ${name}Screen extends AbstractContainerScreen<${name}Menu> {
 
@@ -44,12 +40,20 @@ public class ${name}Screen extends AbstractContainerScreen<${name}Menu> {
 	private final int x, y, z;
 	private final Player entity;
 
-	<#list data.components as component>
-		<#if component.getClass().getSimpleName() == "TextField">
-	    EditBox ${component.name};
-		<#elseif component.getClass().getSimpleName() == "Checkbox">
-	    Checkbox ${component.name};
-		</#if>
+	<#list data.getComponentsOfType("TextField") as component>
+	EditBox ${component.getName()};
+	</#list>
+
+	<#list data.getComponentsOfType("Checkbox") as component>
+	Checkbox ${component.getName()};
+	</#list>
+
+	<#list data.getComponentsOfType("Button") as component>
+	Button ${component.getName()};
+	</#list>
+
+	<#list data.getComponentsOfType("ImageButton") as component>
+	ImageButton ${component.getName()};
 	</#list>
 
 	public ${name}Screen(${name}Menu container, Inventory inventory, Component text) {
@@ -64,24 +68,57 @@ public class ${name}Screen extends AbstractContainerScreen<${name}Menu> {
 	}
 
 	<#if data.doesPauseGame>
-	@Override public boolean isPauseScreen() {
-		return true;
-	}
+		@Override public boolean isPauseScreen() {
+			return true;
+		}
 	</#if>
 
 	<#if data.renderBgLayer>
-	private static final ResourceLocation texture = new ResourceLocation("${modid}:textures/screens/${registryname}.png" );
+		private static final ResourceLocation texture = new ResourceLocation("${modid}:textures/screens/${registryname}.png" );
 	</#if>
 
 	@Override public void render(PoseStack ms, int mouseX, int mouseY, float partialTicks) {
-		this.renderBackground(ms);
 		super.render(ms, mouseX, mouseY, partialTicks);
+
+		<#list data.getComponentsOfType("TextField") as component>
+				${component.getName()}.render(ms, mouseX, mouseY, partialTicks);
+		</#list>
+
+		<#list data.getComponentsOfType("EntityModel") as component>
+			<#assign followMouse = component.followMouseMovement>
+			<#assign x = component.gx(data.width)>
+			<#assign y = component.gy(data.height)>
+			if (<@procedureOBJToConditionCode component.entityModel/> instanceof LivingEntity livingEntity) {
+				<#if hasProcedure(component.displayCondition)>
+					if (<@procedureOBJToConditionCode component.displayCondition/>)
+				</#if>
+				InventoryScreen.renderEntityInInventory(this.leftPos + ${x + 10}, this.topPos + ${y + 20}, ${component.scale},
+					${component.rotationX / 20.0}f <#if followMouse> + (float) Math.atan((this.leftPos + ${x + 10} - mouseX) / 40.0)</#if>,
+					<#if followMouse>(float) Math.atan((this.topPos + ${y + 21 - 50} - mouseY) / 40.0)<#else>0</#if>,
+					livingEntity
+				);
+			}
+		</#list>
+
 		this.renderTooltip(ms, mouseX, mouseY);
 
-		<#list data.components as component>
-			<#if component.getClass().getSimpleName() == "TextField">
-				${component.name}.render(ms, mouseX, mouseY, partialTicks);
+		<#list data.getComponentsOfType("Tooltip") as component>
+			<#assign x = component.gx(data.width)>
+			<#assign y = component.gy(data.height)>
+			<#if hasProcedure(component.displayCondition)>
+				if (<@procedureOBJToConditionCode component.displayCondition/>)
 			</#if>
+				if (mouseX > leftPos + ${x} && mouseX < leftPos + ${x + component.width} && mouseY > topPos + ${y} && mouseY < topPos + ${y + component.height}) {
+					<#if hasProcedure(component.text)>
+					String hoverText = <@procedureOBJToStringCode component.text/>;
+					if (hoverText != null) {
+						this.renderComponentTooltip(ms, Arrays.stream(hoverText.split("\n")).map(TextComponent::new).collect(Collectors.toList()), mouseX, mouseY);
+					}
+					<#else>
+						this.renderTooltip(ms, new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}"), mouseX, mouseY);
+
+					</#if>
+				}
 		</#list>
 	}
 
@@ -91,20 +128,32 @@ public class ${name}Screen extends AbstractContainerScreen<${name}Menu> {
 		RenderSystem.defaultBlendFunc();
 
 		<#if data.renderBgLayer>
-		RenderSystem.setShaderTexture(0, texture);
-		this.blit(ms, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight, this.imageWidth, this.imageHeight);
+            RenderSystem.setShaderTexture(0, texture);
+            this.blit(ms, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight, this.imageWidth, this.imageHeight);
 		</#if>
 
-		<#list data.components as component>
-			<#if component.getClass().getSimpleName() == "Image">
-				<#if hasProcedure(component.displayCondition)>if (<@procedureOBJToConditionCode component.displayCondition/>) {</#if>
-					RenderSystem.setShaderTexture(0, new ResourceLocation("${modid}:textures/screens/${component.image}"));
-					this.blit(ms, this.leftPos + ${(component.x - mx/2)?int}, this.topPos + ${(component.y - my/2)?int}, 0, 0,
-						${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())},
-						${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())});
-				<#if hasProcedure(component.displayCondition)>}</#if>
-			</#if>
+		<#list data.getComponentsOfType("Image") as component>
+			<#if hasProcedure(component.displayCondition)>if (<@procedureOBJToConditionCode component.displayCondition/>) {</#if>
+				RenderSystem.setShaderTexture(0, new ResourceLocation("${modid}:textures/screens/${component.image}"));
+					this.blit(ms, this.leftPos + ${component.gx(data.width)}, this.topPos + ${component.gy(data.height)}, 0, 0,
+					${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())},
+					${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())});
+			<#if hasProcedure(component.displayCondition)>}</#if>
 		</#list>
+
+		<#list data.getComponentsOfType("Sprite") as component>
+ 			<#if hasProcedure(component.displayCondition)>if (<@procedureOBJToConditionCode component.displayCondition/>) {</#if>
+ 				RenderSystem.setShaderTexture(0, new ResourceLocation("${modid}:textures/screens/${component.sprite}"));
+ 				this.blit(ms, this.leftPos + ${component.gx(data.width)}, this.topPos + ${component.gy(data.height)},
+ 					<#if (component.getTextureWidth(w.getWorkspace()) > component.getTextureHeight(w.getWorkspace()))>
+ 						<@getSpriteByIndex component "width"/>, 0
+ 					<#else>
+ 						0, <@getSpriteByIndex component "height"/>
+ 					</#if>,
+ 					${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())},
+ 					${component.getTextureWidth(w.getWorkspace())}, ${component.getTextureHeight(w.getWorkspace())});
+ 			<#if hasProcedure(component.displayCondition)>}</#if>
+ 		</#list>
 
 		RenderSystem.disableBlend();
 	}
@@ -115,109 +164,171 @@ public class ${name}Screen extends AbstractContainerScreen<${name}Menu> {
 			return true;
 		}
 
-		<#list data.components as component>
-			<#if component.getClass().getSimpleName() == "TextField">
-		    if(${component.name}.isFocused())
-		    	return ${component.name}.keyPressed(key, b, c);
-			</#if>
+		<#list data.getComponentsOfType("TextField") as component>
+			if(${component.getName()}.isFocused())
+				return ${component.getName()}.keyPressed(key, b, c);
 		</#list>
 
 		return super.keyPressed(key, b, c);
 	}
 
+	<#if data.getComponentsOfType("TextField")?has_content>
 	@Override public void containerTick() {
 		super.containerTick();
-		<#list data.components as component>
-			<#if component.getClass().getSimpleName() == "TextField">
-				${component.name}.tick();
-			</#if>
+		<#list data.getComponentsOfType("TextField") as component>
+		${component.getName()}.tick();
 		</#list>
 	}
+
+	@Override public void resize(Minecraft minecraft, int width, int height) {
+ 		<#list data.getComponentsOfType("TextField") as component>
+ 		String ${component.getName()}Value = ${component.getName()}.getValue();
+ 		</#list>
+ 		super.resize(minecraft, width, height);
+ 		<#list data.getComponentsOfType("TextField") as component>
+ 		${component.getName()}.setValue(${component.getName()}Value);
+ 		</#list>
+ 	}
+	</#if>
 
 	@Override protected void renderLabels(PoseStack poseStack, int mouseX, int mouseY) {
-		<#list data.components as component>
-			<#if component.getClass().getSimpleName() == "Label">
-				<#if hasProcedure(component.displayCondition)>
-				if (<@procedureOBJToConditionCode component.displayCondition/>)
-				</#if>
-		    	this.font.draw(poseStack, "${translateTokens(JavaConventions.escapeStringForJava(component.text))}",
-					${(component.x - mx / 2)?int}, ${(component.y - my / 2)?int}, ${component.color.getRGB()});
+		<#list data.getComponentsOfType("Label") as component>
+			<#if hasProcedure(component.displayCondition)>
+			if (<@procedureOBJToConditionCode component.displayCondition/>)
 			</#if>
+			this.font.draw(poseStack,
+				<#if hasProcedure(component.text)><@procedureOBJToStringCode component.text/><#else>new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}")</#if>,
+				${component.gx(data.width)}, ${component.gy(data.height)}, ${component.color.getRGB()});
 		</#list>
-	}
-
-	@Override public void onClose() {
-		super.onClose();
-		Minecraft.getInstance().keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	@Override public void init() {
 		super.init();
 
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
+		<#list data.getComponentsOfType("TextField") as component>
+			${component.getName()} = new EditBox(this.font, this.leftPos + ${component.gx(data.width) + 1}, this.topPos + ${component.gy(data.height) + 1},
+			${component.width - 2}, ${component.height - 2}, new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}"))
+			<#if component.placeholder?has_content>
+			{
+				@Override public void insertText(String text) {
+					super.insertText(text);
+					if (getValue().isEmpty())
+						setSuggestion(new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}").getString());
+					else
+						setSuggestion(null);
+				}
+
+				@Override public void moveCursorTo(int pos) {
+					super.moveCursorTo(pos);
+					if (getValue().isEmpty())
+						setSuggestion(new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}").getString());
+					else
+						setSuggestion(null);
+				}
+			}
+			</#if>;
+			<#if component.placeholder?has_content>
+			${component.getName()}.setSuggestion(new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}").getString());
+			</#if>
+			${component.getName()}.setMaxLength(32767);
+
+        	guistate.put("text:${component.getName()}", ${component.getName()});
+			this.addWidget(this.${component.getName()});
+		</#list>
 
 		<#assign btid = 0>
-		<#list data.components as component>
-			<#if component.getClass().getSimpleName() == "TextField">
-				${component.name} = new EditBox(this.font, this.leftPos + ${(component.x - mx/2)?int}, this.topPos + ${(component.y - my/2)?int},
-				${component.width}, ${component.height}, new TextComponent("${component.placeholder}"))
-				<#if component.placeholder?has_content>
-				{
-					{
-						setSuggestion("${component.placeholder}");
-					}
 
-					@Override public void insertText(String text) {
-						super.insertText(text);
+		<#list data.getComponentsOfType("Button") as component>
+			<#if component.isUndecorated>
+				${component.getName()} = new PlainTextButton(
+					this.leftPos + ${component.gx(data.width)}, this.topPos + ${component.gy(data.height)},
+					${component.width}, ${component.height},
+					new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}"),
+					<@buttonOnClick component/>, this.font
+				)<@buttonDisplayCondition component/>;
+			<#else>
+			${component.getName()} = new Button(
+				this.leftPos + ${component.gx(data.width)}, this.topPos + ${component.gy(data.height)},
+				${component.width}, ${component.height},
+				new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}"),
+				<@buttonOnClick component/>
+			)<@buttonDisplayCondition component/>;
+		    </#if>
 
-						if(getValue().isEmpty())
-							setSuggestion("${component.placeholder}");
-						else
-							setSuggestion(null);
-					}
+			guistate.put("button:${component.getName()}", ${component.getName()});
+			this.addRenderableWidget(${component.getName()});
 
-					@Override public void moveCursorTo(int pos) {
-						super.moveCursorTo(pos);
+			<#assign btid +=1>
+		</#list>
 
-						if(getValue().isEmpty())
-							setSuggestion("${component.placeholder}");
-						else
-							setSuggestion(null);
-					}
-				}
-				</#if>;
-                guistate.put("text:${component.name}", ${component.name});
-				${component.name}.setMaxLength(32767);
-				this.addWidget(this.${component.name});
-			<#elseif component.getClass().getSimpleName() == "Button">
-				this.addRenderableWidget(new Button(this.leftPos + ${(component.x - mx/2)?int}, this.topPos + ${(component.y - my/2)?int},
-					${component.width}, ${component.height}, new TextComponent("${component.text}"), e -> {
-							<#if hasProcedure(component.onClick)>
-							if (<@procedureOBJToConditionCode component.displayCondition/>) {
-								${JavaModName}.PACKET_HANDLER.sendToServer(new ${name}ButtonMessage(${btid}, x, y, z));
-								${name}ButtonMessage.handleButtonAction(entity, ${btid}, x, y, z);
-							}
-							</#if>
-					}
-				)
-                <#if hasProcedure(component.displayCondition)>
-                {
-					@Override public void render(PoseStack ms, int gx, int gy, float ticks) {
-						if (<@procedureOBJToConditionCode component.displayCondition/>)
-							super.render(ms, gx, gy, ticks);
-					}
-				}
-				</#if>);
-				<#assign btid +=1>
-			<#elseif component.getClass().getSimpleName() == "Checkbox">
-            	${component.name} = new Checkbox(this.leftPos + ${(component.x - mx/2)?int}, this.topPos + ${(component.y - my/2)?int},
-						20, 20, new TextComponent("${component.text}"), <#if hasProcedure(component.isCheckedProcedure)>
-            	    <@procedureOBJToConditionCode component.isCheckedProcedure/><#else>false</#if>);
-                guistate.put("checkbox:${component.name}", ${component.name});
-                this.addRenderableWidget(${component.name});
-			</#if>
+		<#list data.getComponentsOfType("ImageButton") as component>
+			${component.getName()} = new ImageButton(
+				this.leftPos + ${component.gx(data.width)}, this.topPos + ${component.gy(data.height)},
+				${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())},
+				0, 0, ${component.getHeight(w.getWorkspace())},
+				new ResourceLocation("${modid}:textures/screens/atlas/${component.getName()}.png"),
+				${component.getWidth(w.getWorkspace())},
+				${component.getHeight(w.getWorkspace()) * 2},
+				<@buttonOnClick component/>
+			)<@buttonDisplayCondition component/>;
+
+			guistate.put("button:${component.getName()}", ${component.getName()});
+			this.addRenderableWidget(${component.getName()});
+
+			<#assign btid +=1>
+		</#list>
+
+		<#list data.getComponentsOfType("Checkbox") as component>
+			${component.getName()} = new Checkbox(this.leftPos + ${component.gx(data.width)}, this.topPos + ${component.gy(data.height)},
+					20, 20, new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}"), <#if hasProcedure(component.isCheckedProcedure)>
+        	    <@procedureOBJToConditionCode component.isCheckedProcedure/><#else>false</#if>);
+
+        	guistate.put("checkbox:${component.getName()}", ${component.getName()});
+        	this.addRenderableWidget(${component.getName()});
 		</#list>
 	}
-
 }
+<#macro buttonOnClick component>
+e -> {
+	<#if hasProcedure(component.onClick)>
+		if (<@procedureOBJToConditionCode component.displayCondition/>) {
+			${JavaModName}.PACKET_HANDLER.sendToServer(new ${name}ButtonMessage(${btid}, x, y, z));
+			${name}ButtonMessage.handleButtonAction(entity, ${btid}, x, y, z);
+		}
+	</#if>
+}
+</#macro>
+<#macro buttonDisplayCondition component>
+<#if hasProcedure(component.displayCondition)>
+{
+	@Override public void renderWidget(PoseStack ms, int gx, int gy, float ticks) {
+		this.visible = <@procedureOBJToConditionCode component.displayCondition/>;
+ 		super.renderWidget(ms, gx, gy, ticks);
+	}
+}
+</#if>
+</#macro>
+<#macro getSpriteByIndex component dim>
+ 	<#if hasProcedure(component.spriteIndex)>
+ 		Mth.clamp((int) <@procedureOBJToNumberCode component.spriteIndex/> *
+ 			<#if dim == "width">
+ 				${component.getWidth(w.getWorkspace())}
+ 			<#else>
+ 				${component.getHeight(w.getWorkspace())}
+ 			</#if>,
+ 			0,
+ 			<#if dim == "width">
+ 				${component.getTextureWidth(w.getWorkspace()) - component.getWidth(w.getWorkspace())}
+ 			<#else>
+ 				${component.getTextureHeight(w.getWorkspace()) - component.getHeight(w.getWorkspace())}
+ 			</#if>
+ 		)
+ 	<#else>
+ 		<#if dim == "width">
+ 			${component.getWidth(w.getWorkspace()) * component.spriteIndex.getFixedValue()}
+ 		<#else>
+ 			${component.getHeight(w.getWorkspace()) * component.spriteIndex.getFixedValue()}
+ 		</#if>
+ 	</#if>
+ </#macro>
 <#-- @formatter:on -->

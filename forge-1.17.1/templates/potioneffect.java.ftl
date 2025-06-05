@@ -1,7 +1,7 @@
 <#--
  # MCreator (https://mcreator.net/)
  # Copyright (C) 2012-2020, Pylo
- # Copyright (C) 2020-2022, Pylo, opensource contributors
+ # Copyright (C) 2020-2023, Pylo, opensource contributors
  #
  # This program is free software: you can redistribute it and/or modify
  # it under the terms of the GNU General Public License as published by
@@ -31,19 +31,17 @@
 <#-- @formatter:off -->
 <#include "mcitems.ftl">
 <#include "procedures.java.ftl">
-
 package ${package}.potion;
 
 <#compress>
 public class ${name}MobEffect extends MobEffect {
 
 	public ${name}MobEffect() {
-		super(MobEffectCategory.<#if data.isBad>HARMFUL<#elseif data.isBenefitical>BENEFICIAL<#else>NEUTRAL</#if>, ${data.color.getRGB()});
-		setRegistryName("${registryname}");
-	}
-
-	@Override public String getDescriptionId() {
-		return "effect.${modid}.${registryname}";
+		super(MobEffectCategory.${data.mobEffectCategory}, ${data.color.getRGB()});
+		<#list data.modifiers as modifier>
+		this.addAttributeModifier(${modifier.attribute}, "${w.getUUID(data.getModElement().getRegistryName() + "_" + modifier?index)}", ${modifier.amount},
+				AttributeModifier.Operation.${getAttributeOperation(modifier.operation)});
+		</#list>
 	}
 
 	<#if data.isInstant>
@@ -51,6 +49,16 @@ public class ${name}MobEffect extends MobEffect {
 			return true;
 		}
 	</#if>
+
+	<#if data.isCuredbyHoney>
+ 	@Override public List<ItemStack> getCurativeItems() {
+ 		ArrayList<ItemStack> cures = new ArrayList<ItemStack>();
+ 		cures.add(new ItemStack(Items.MILK_BUCKET));
+ 		cures.add(new ItemStack(Items.TOTEM_OF_UNDYING));
+ 		cures.add(new ItemStack(Items.HONEY_BOTTLE));
+ 		return cures;
+ 	}
+ 	</#if>
 
 	<#if hasProcedure(data.onStarted)>
 		<#if data.isInstant>
@@ -66,6 +74,7 @@ public class ${name}MobEffect extends MobEffect {
 			}
 		<#else>
 			@Override public void addAttributeModifiers(LivingEntity entity, AttributeMap attributeMap, int amplifier) {
+				super.addAttributeModifiers(entity, attributeMap, amplifier);
 				<@procedureCode data.onStarted, {
 					"x": "entity.getX()",
 					"y": "entity.getY()",
@@ -114,30 +123,39 @@ public class ${name}MobEffect extends MobEffect {
 	}
 
 	<#if data.hasCustomRenderer()>
-		@Override public void initializeClient(java.util.function.Consumer<net.minecraftforge.client.EffectRenderer> consumer) {
-			consumer.accept(new EffectRenderer() {
-				<#if !data.renderStatusInInventory>
-					@Override public boolean shouldRender(MobEffectInstance effect) {
-						return false;
-					}
+	@Override public void initializeClient(java.util.function.Consumer<net.minecraftforge.client.EffectRenderer> consumer) {
+		consumer.accept(new EffectRenderer() {
+			<#if !data.renderStatusInInventory>
+			@Override public boolean shouldRender(MobEffectInstance effect) {
+				return false;
+			}
 
-					@Override public boolean shouldRenderInvText(MobEffectInstance effect) {
-						return false;
-					}
-				</#if>
-	
-				<#if !data.renderStatusInHUD>
-					@Override public boolean shouldRenderHUD(MobEffectInstance effect) {
-						return false;
-					}
-				</#if>
+			@Override public boolean shouldRenderInvText(MobEffectInstance effect) {
+				return false;
+			}
+			</#if>
+
+			<#if !data.renderStatusInHUD>
+			@Override public boolean shouldRenderHUD(MobEffectInstance effect) {
+				return false;
+			}
+			</#if>
 
 			@Override public void renderInventoryEffect(MobEffectInstance effect, EffectRenderingInventoryScreen<?> gui, PoseStack mStack, int x, int y, float z) {}
 
 			@Override public void renderHUDEffect(MobEffectInstance effect, GuiComponent gui, PoseStack mStack, int x, int y, float z, float alpha) {}
-			});
-		}
+		});
+	}
 	</#if>
 }
 </#compress>
 <#-- @formatter:on -->
+<#function getAttributeOperation operation>
+ 	<#if operation == "ADD_VALUE">
+ 		<#return "ADDITION">
+ 	<#elseif operation == "ADD_MULTIPLIED_BASE">
+ 		<#return "MULTIPLY_BASE">
+ 	<#else>
+ 		<#return "MULTIPLY_TOTAL">
+ 	</#if>
+ </#function>

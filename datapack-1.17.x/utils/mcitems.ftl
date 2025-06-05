@@ -1,8 +1,32 @@
-<#function mappedMCItemToIngameItemName mappedBlock>
-    <#if mappedBlock.getUnmappedValue().startsWith("TAG:")>
-        <#return "\"tag\": \"" + mappedBlock.getUnmappedValue().replace("TAG:", "")?lower_case + "\"">
+<#function mappedBlockToBlockStateProvider mappedBlock>
+    <#if mappedBlock?starts_with("/*@BlockStateProvider*/")>
+        <#return mappedBlock?replace("/*@BlockStateProvider*/", "")>
+	<#elseif featureType == "configured_feature_reference">
+ 		<#return '{"feature": ' + featureConfig + ', "placement": [' + placement?remove_ending(",") + ']}'>
     <#else>
-        <#assign mapped = generator.map(mappedBlock.getUnmappedValue(), "blocksitems") />
+        <#return '{"type": "minecraft:simple_state_provider", "state": ' + mappedBlock + '}'>
+    </#if>
+</#function>
+
+<#function transformExtension mappedBlock>
+    <#assign extension = mappedBlock?keep_after_last(".")?replace("body", "chestplate")?replace("legs", "leggings")>
+    <#return (extension?has_content)?then("_" + extension, "")>
+</#function>
+
+<#function mappedMCItemToItemObjectJSON mappedBlock>
+    <#if mappedBlock.getUnmappedValue().startsWith("CUSTOM:")>
+        <#assign customelement = generator.getRegistryNameFromFullName(mappedBlock.getUnmappedValue())!""/>
+        <#if customelement?has_content>
+            <#return "\"item\": \"" + "${modid}:" + customelement
+            + transformExtension(mappedBlock)
+            + "\"">
+        <#else>
+            <#return "\"item\": \"minecraft:air\"">
+        </#if>
+    <#elseif mappedBlock.getUnmappedValue().startsWith("TAG:")>
+        <#return "\"tag\": \"" + mappedBlock.getUnmappedValue().replace("TAG:", "").replace("mod:", modid + ":")?lower_case + "\"">
+    <#else>
+        <#assign mapped = mappedBlock.getMappedValue(1) />
         <#if mapped.startsWith("#")>
             <#return "\"tag\": \"" + mapped.replace("#", "") + "\"">
         <#elseif mapped.contains(":")>
@@ -13,13 +37,28 @@
     </#if>
 </#function>
 
-<#function mappedMCItemToIngameNameNoTags mappedBlock>
-    <#if mappedBlock.getUnmappedValue().startsWith("TAG:")>
-        <#return "minecraft:air">
-    <#else>
-        <#assign mapped = generator.map(mappedBlock.getUnmappedValue(), "blocksitems") />
-        <#if mapped.startsWith("#")>
+<#function mappedMCItemToRegistryName mappedBlock acceptTags=false>
+    <#if mappedBlock.getUnmappedValue().startsWith("CUSTOM:")>
+        <#assign customelement = generator.getRegistryNameFromFullName(mappedBlock.getUnmappedValue())!""/>
+        <#if customelement?has_content>
+            <#return "${modid}:" + customelement + transformExtension(mappedBlock)>
+        <#else>
             <#return "minecraft:air">
+        </#if>
+    <#elseif mappedBlock.getUnmappedValue().startsWith("TAG:")>
+        <#if acceptTags>
+            <#return "#" + mappedBlock.getUnmappedValue().replace("TAG:", "").replace("mod:", modid + ":")?lower_case>
+        <#else>
+            <#return "minecraft:air">
+        </#if>
+    <#else>
+        <#assign mapped = mappedBlock.getMappedValue(1) />
+        <#if mapped.startsWith("#")>
+            <#if acceptTags>
+                <#return mapped>
+            <#else>
+                <#return "minecraft:air">
+            </#if>
         <#elseif mapped.contains(":")>
             <#return mapped>
         <#else>
@@ -30,7 +69,7 @@
 
 <#function mappedMCItemToBlockStateJSON mappedBlock>
     <#if !mappedBlock.getUnmappedValue().startsWith("TAG:")>
-        <#assign mapped = generator.map(mappedBlock.getUnmappedValue(), "blocksitems") />
+        <#assign mapped = mappedBlock.getMappedValue(1) />
         <#if !mapped.startsWith("#")>
             <#if !mapped.contains(":")>
                 <#assign mapped = "minecraft:" + mapped />

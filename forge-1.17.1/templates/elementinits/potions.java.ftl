@@ -29,36 +29,20 @@
 -->
 
 <#-- @formatter:off -->
-
 /*
  *    MCreator note: This file will be REGENERATED on each build.
  */
-
 package ${package}.init;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD) public class ${JavaModName}Potions {
+public class ${JavaModName}Potions {
 
-    private static final List<Potion> REGISTRY = new ArrayList<>();
+	public static final DeferredRegister<Potion> REGISTRY = DeferredRegister.create(ForgeRegistries.POTIONS, ${JavaModName}.MODID);
 
     <#list potions as potion>
-    <#if potion.effects??><#-- #2988, seems this can become null -->
-    public static final Potion ${potion.getModElement().getRegistryNameUpper()} = register(new Potion(
-        <#list potion.effects as effect>
-        new MobEffectInstance(${effect.effect}, ${effect.duration}, ${effect.amplifier}, ${effect.ambient}, ${effect.showParticles})<#if effect?has_next>,</#if>
-        </#list>)
-    </#if>
-    .setRegistryName("${potion.getModElement().getRegistryName()}"));
+        public static final RegistryObject<Potion> ${potion.getModElement().getRegistryNameUpper()} = REGISTRY.register("${potion.getModElement().getRegistryName()}", () -> new Potion(
+            <#list potion.effects as effect>
+            new MobEffectInstance(${effect.effect}, ${effect.getDuration()}, ${effect.amplifier}, ${effect.ambient}, ${effect.showParticles})<#if effect?has_next>,</#if>
+            </#list>));
     </#list>
-
-    private static Potion register(Potion potion) {
-		REGISTRY.add(potion);
-    	return potion;
-    }
-
-	@SubscribeEvent public static void registerPotions(RegistryEvent.Register<Potion> event) {
-		event.getRegistry().registerAll(REGISTRY.toArray(new Potion[0]));
-	}
-
 }
-
 <#-- @formatter:on -->
