@@ -1,12 +1,12 @@
 plugins {
     id 'eclipse'
-    id 'net.neoforged.moddev.legacyforge' version '2.0.89'
+    id 'net.neoforged.moddev.legacyforge' version '2.0.92'
 }
 
 version = '1.0'
 base.archivesName = "modid"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 legacyForge {
     version = "${generator.getGeneratorMinecraftVersion()}-${generator.getGeneratorBuildFileVersion()}"

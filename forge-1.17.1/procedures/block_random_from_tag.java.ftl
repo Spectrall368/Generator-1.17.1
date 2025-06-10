@@ -1,6 +1,3 @@
 <#include "mcelements.ftl">
-(new Object() {
-	public Block getRandomBlock(ResourceLocation name) {
-		net.minecraft.tags.Tag<Block> _tag = BlockTags.getAllTags().getTagOrEmpty(name);
-		return _tag.getValues().isEmpty() ? Blocks.AIR : _tag.getRandomElement(new Random());
-}}.getRandomBlock(${toResourceLocation(input$tag)}))
+<@addTemplate file="utils/random/block_random_from_tag.java.ftl"/>
+(getRandomBlock(${toResourceLocation(input$tag)}))
