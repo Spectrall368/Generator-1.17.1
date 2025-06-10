@@ -31,91 +31,101 @@
 <#-- @formatter:off -->
 <#include "../procedures.java.ftl">
 <#include "../mcitems.ftl">
-
 package ${package}.world.features.ores;
+<#assign cond = false>
+<#if data.restrictionBiomes?has_content>
+	<#list w.filterBrokenReferences(data.restrictionBiomes) as restrictionBiome>
+		<#if restrictionBiome?contains(":is_")>
+			<#assign cond = true>
+			 <#break>
+		</#if>
+		<#break>
+	</#list>
+</#if>
+<#if data.maxGenerateHeight gt 256>
+	<#assign maxGenerateHeight = 256>
+<#elseif data.maxGenerateHeight lt 0>
+	<#assign maxGenerateHeight = 0>
+<#else>
+	<#assign maxGenerateHeight = data.maxGenerateHeight>
+</#if>
+<#if data.minGenerateHeight gt 256>
+	<#assign minGenerateHeight = 256>
+<#elseif data.minGenerateHeight lt 0>
+	<#assign minGenerateHeight = 0>
+<#else>
+	<#assign minGenerateHeight = data.minGenerateHeight>
+</#if>
+
 
 public class ${name}Feature extends OreFeature {
+	public static final ${name}Feature FEATURE = new ${name}Feature().setRegistryName("${modid}:${registryname}");
+	public static final ConfiguredFeature<OreConfiguration, ?> CONFIGURED_FEATURE = FEATURE.configured(new OreConfiguration(${name}FeatureRuleTest.INSTANCE, ${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.get().defaultBlockState(), ${data.frequencyOnChunk}))
+				.count(${data.frequencyPerChunks}).squared()
+				.range(new RangeDecoratorConfiguration(<#if data.generationShape == "UNIFORM">UniformHeight<#else>TrapezoidHeight</#if>.of(VerticalAnchor.absolute(${data.minGenerateHeight}), VerticalAnchor.absolute(${data.maxGenerateHeight}))));
 
-	public static final ${name}Feature FEATURE = (${name}Feature) new ${name}Feature().setRegistryName("${modid}:${registryname}");
-	public static final ConfiguredFeature<?, ?> CONFIGURED_FEATURE = FEATURE
-				.configured(new OreConfiguration(${name}FeatureRuleTest.INSTANCE, ${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.defaultBlockState(), ${data.frequencyOnChunk}))
-				.range(new RangeDecoratorConfiguration(<#if data.generationShape == "UNIFORM">UniformHeight<#elseif data.generationShape == "TRIANGLE">TrapezoidHeight</#if>.of(VerticalAnchor.absolute(<#if data.minGenerateHeight gt 256>256<#elseif data.minGenerateHeight lt 0>0<#else>${data.minGenerateHeight}</#if>), VerticalAnchor.absolute(<#if data.maxGenerateHeight gt 256>256<#elseif data.maxGenerateHeight lt 0>0<#else>${data.maxGenerateHeight}</#if>))))
-				.squared().count(${data.frequencyPerChunks});
+	public static ConfiguredFeature<?, ?> configuredFeature() {
+		return CONFIGURED_FEATURE;
+	}
 
 	public static final Set<ResourceLocation> GENERATE_BIOMES =
-	<#if data.restrictionBiomes?has_content>
+	<#if data.restrictionBiomes?has_content && !cond>
 	Set.of(
 		<#list w.filterBrokenReferences(data.restrictionBiomes) as restrictionBiome>
-			new ResourceLocation("${restrictionBiome}")<#sep>,
+			new ResourceLocation("${restrictionBiome?replace("#", "")}")<#sep>,
 		</#list>
 	);
 	<#else>
 	null;
 	</#if>
 
+    <#if data.restrictionBiomes?has_content && cond>
 	private final Set<ResourceKey<Level>> generate_dimensions = Set.of(
-		<#list data.spawnWorldTypes as worldType>
-			<#if worldType == "Surface">
+	    <#list w.filterBrokenReferences(data.restrictionBiomes) as restrictionBiome>
+			<#if restrictionBiome == "#minecraft:is_overworld">
 				Level.OVERWORLD
-			<#elseif worldType == "Nether">
+			<#elseif restrictionBiome == "#minecraft:is_nether">
 				Level.NETHER
-			<#elseif worldType == "End">
+			<#elseif restrictionBiome == "#minecraft:is_end">
 				Level.END
 			<#else>
-				ResourceKey.create(Registry.DIMENSION_REGISTRY,
-						new ResourceLocation("${generator.getResourceLocationForModElement(worldType.toString().replace("CUSTOM:", ""))}"))
+			    ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("${modid}:${restrictionBiome?keep_after("is_")}"))
 			</#if><#sep>,
 		</#list>
 	);
+	</#if>
 
 	public ${name}Feature() {
 		super(OreConfiguration.CODEC);
 	}
 
-	public boolean place(FeaturePlaceContext<OreConfiguration> context) {
+	@Override public boolean place(FeaturePlaceContext<OreConfiguration> context) {
 		WorldGenLevel world = context.level();
+		<#if data.restrictionBiomes?has_content && cond>
 		if (!generate_dimensions.contains(world.getLevel().dimension()))
 			return false;
-
-		<#if hasProcedure(data.generateCondition)>
-		int x = context.origin().getX();
-		int y = context.origin().getY();
-		int z = context.origin().getZ();
-		if (!<@procedureOBJToConditionCode data.generateCondition/>)
-			return false;
-		</#if>
+        </#if>
 
 		return super.place(context);
 	}
 
-	private static class ${name}FeatureRuleTest extends RuleTest {
-
+	@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD) private static class ${name}FeatureRuleTest extends RuleTest {
 		static final ${name}FeatureRuleTest INSTANCE = new ${name}FeatureRuleTest();
-		static final com.mojang.serialization.Codec<${name}FeatureRuleTest> codec = com.mojang.serialization.Codec.unit(() -> INSTANCE);
 
-		static final RuleTestType<${name}FeatureRuleTest> CUSTOM_MATCH = Registry.register(Registry.RULE_TEST,
-				new ResourceLocation("${modid}:${registryname}_match"), () -> codec);
+		private static final Codec<${name}FeatureRuleTest> CODEC = Codec.unit(() -> INSTANCE);
+		private static final RuleTestType<${name}FeatureRuleTest> CUSTOM_MATCH = () -> CODEC;
 
-		private List<Block> base_blocks = null;
+		@SubscribeEvent public static void init(FMLCommonSetupEvent event) {
+			Registry.register(Registry.RULE_TEST, new ResourceLocation("${modid}:${registryname}_match"), CUSTOM_MATCH);
+		}
 
-		public boolean test(BlockState blockAt, Random random) {
-			if (base_blocks == null) {
-				base_blocks = List.of(
-					<#list data.blocksToReplace as replacementBlock>
-						${mappedBlockToBlock(replacementBlock)}<#sep>,
-					</#list>
-				);
-			}
-
-			return base_blocks.contains(blockAt.getBlock());
+		public boolean test(BlockState blockstate, Random random) {
+		    return ${containsAnyOfBlocks(data.blocksToReplace "blockstate")};
 		}
 
 		protected RuleTestType<?> getType() {
 			return CUSTOM_MATCH;
 		}
-
 	}
-
 }
-
 <#-- @formatter:on -->
