@@ -239,21 +239,17 @@ public class ${name}Screen extends AbstractContainerScreen<${name}Menu> {
 		<#assign btid = 0>
 
 		<#list data.getComponentsOfType("Button") as component>
-			<#if component.isUndecorated>
-				${component.getName()} = new PlainTextButton(
-					this.leftPos + ${component.gx(data.width)}, this.topPos + ${component.gy(data.height)},
-					${component.width}, ${component.height},
-					new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}"),
-					<@buttonOnClick component/>, this.font
-				)<@buttonDisplayCondition component/>;
-			<#else>
 			${component.getName()} = new Button(
 				this.leftPos + ${component.gx(data.width)}, this.topPos + ${component.gy(data.height)},
 				${component.width}, ${component.height},
 				new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}"),
 				<@buttonOnClick component/>
-			)<@buttonDisplayCondition component/>;
-		    </#if>
+				)<#if component.isUndecorated>{
+                    @Override public void renderButton(PoseStack ms, int mouseX, int mouseY, float partialTick) {
+                        Component text = this.isHovered() ? ComponentUtils.mergeStyles(${component.getName()}.getMessage().copy(), Style.EMPTY.withUnderlined(true)); : ${component.getName()}.getMessage();
+                        drawString(ms, Minecraft.getInstance().fontRenderer, text, ${component.getName()}.x, ${component.getName()}.y, 16777215 | MathHelper.ceil(this.alpha * 255.0F) << 24);
+                    }
+				}</#if><@buttonDisplayCondition component/>;
 
 			guistate.put("button:${component.getName()}", ${component.getName()});
 			this.addRenderableWidget(${component.getName()});

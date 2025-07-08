@@ -10,10 +10,12 @@
   "coordinate_scale": ${data.coordinateScale},
   "ambient_light": ${data.ambientLight},
   "infiniburn": "${data.infiniburnTag}",
-  "logical_height": 256,
   <#if data.hasFixedTime>
   "fixed_time": ${data.fixedTimeValue},
   </#if>
+  "min_y": 0,
+  "height": 256,
+  "logical_height": 256,
   <#if data.useCustomEffects>
   "effects": "${modid}:${registryname}"
   <#else>

@@ -1,0 +1,1 @@
+new SpringConfiguration(${generator.map(field$state, "fluids")}, ${field$requires_block_below}, ${field$rock_count}, ${field$hole_count}, List.of(${input$valid_blocks}))

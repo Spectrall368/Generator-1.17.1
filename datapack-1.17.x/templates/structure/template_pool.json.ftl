@@ -15,8 +15,7 @@
         "element_type": "minecraft:single_pool_element",
         "location": "${modid}:${part.structure}",
         "projection": "${part.projection}",
-        "processors": {
-          "processors": [
+        "processors": [
             <#if part.ignoredBlocks?has_content>
             {
               "processor_type": "minecraft:block_ignore",
@@ -30,7 +29,6 @@
             }
             </#if>
           ]
-        }
       }
     }<#sep>,
     </#list>

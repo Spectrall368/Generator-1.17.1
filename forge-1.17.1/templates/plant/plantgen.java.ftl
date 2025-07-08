@@ -31,85 +31,133 @@
 <#-- @formatter:off -->
 <#include "../procedures.java.ftl">
 <#include "../mcitems.ftl">
-
 package ${package}.world.features.plants;
+<#assign cond = false>
+<#if data.restrictionBiomes?has_content>
+	<#list w.filterBrokenReferences(data.restrictionBiomes) as restrictionBiome>
+	    <#assign biomeName = fixNamespace(restrictionBiome)>
+        <#if biomeName == "#minecraft:is_overworld" || biomeName == "#minecraft:is_nether" || biomeName == "#minecraft:is_end">
+			<#assign cond = true>
+			 <#break>
+		</#if>
+	</#list>
+</#if>
 
-import com.mojang.serialization.Codec;
-
-public class ${name}Feature extends <#if data.plantType == "normal" && data.staticPlantGenerationType == "Flower">DefaultFlowerFeature<#else>RandomPatchFeature</#if> {
-	public static final ${name}Feature FEATURE = (${name}Feature) new ${name}Feature().setRegistryName("${modid}:${registryname}");
-	public static final ConfiguredFeature<?, ?> CONFIGURED_FEATURE = FEATURE
-				.configured(
-					new RandomPatchConfiguration.GrassConfigurationBuilder(
-						new SimpleStateProvider(${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.defaultBlockState()),
-						<#if data.plantType == "double">DoublePlantPlacer.INSTANCE
-						<#elseif data.plantType == "normal">SimpleBlockPlacer.INSTANCE
-						<#else>new ColumnPlacer(BiasedToBottomInt.of(2, 4))
-						</#if>
-					)
-					.tries(${data.patchSize})
-					<#if data.plantType == "growapable">.xspread(4).yspread(0).zspread(4).noProjection()</#if>
-					<#if data.plantType == "double" && data.doublePlantGenerationType == "Flower">.noProjection()</#if>
-					.build()
-				)
-				.decorated(FeatureDecorator.HEIGHTMAP<#if (data.plantType == "normal" && data.staticPlantGenerationType == "Grass") || data.plantType == "growapable">_SPREAD_DOUBLE</#if>.configured(new HeightmapConfiguration(Heightmap.Types.MOTION_BLOCKING)))
-				.squared()
-				<#if data.generateAtAnyHeight>
-public static final RangeDecoratorConfiguration FULL_RANGE = new RangeDecoratorConfiguration(UniformHeight.of(VerticalAnchor.bottom(), VerticalAnchor.top()))
-				<#else>
-				.count(${data.frequencyOnChunks})
-				<#if (data.plantType == "normal" && data.staticPlantGenerationType == "Flower") ||
-					 (data.plantType == "double" && data.doublePlantGenerationType == "Flower") ||
-					  data.plantType == "growapable">
-					.rarity(32)
-				</#if>
-				</#if>;
-
-	public static final Set<ResourceLocation> GENERATE_BIOMES =
-	<#if data.restrictionBiomes?has_content>
-	Set.of(
-		<#list w.filterBrokenReferences(data.restrictionBiomes) as restrictionBiome>
-			new ResourceLocation("${restrictionBiome}")<#sep>,
-		</#list>
-	);
-	<#else>
-	null;
-	</#if>
-
-	private final Set<ResourceKey<Level>> generate_dimensions = Set.of(
-		<#list data.spawnWorldTypes as worldType>
-			<#if worldType == "Surface">
-				Level.OVERWORLD
-			<#elseif worldType == "Nether">
-				Level.NETHER
-			<#elseif worldType == "End">
-				Level.END
-			<#else>
-				ResourceKey.create(Registry.DIMENSION_REGISTRY,
-						new ResourceLocation("${generator.getResourceLocationForModElement(worldType.toString().replace("CUSTOM:", ""))}"))
-			</#if><#sep>,
-		</#list>
-	);
+public class ${name}Feature extends <#if data.plantType == "normal" && data.generationType == "Flower">DefaultFlower<#else>RandomPatch</#if>Feature {
+    private static ${name}Feature INSTANCE = null;
+  	private static ConfiguredFeature<?, ?> CONFIGURED_FEATURE = null;
 
 	public ${name}Feature() {
 		super(RandomPatchConfiguration.CODEC);
 	}
 
-	public boolean place(FeaturePlaceContext<RandomPatchConfiguration> context) {
+	public static Feature<?> feature() {
+		INSTANCE = new ${name}Feature();
+		CONFIGURED_FEATURE = INSTANCE.configured(
+            new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.get().defaultBlockState()),
+        	<#if data.plantType == "double">DoublePlantPlacer.INSTANCE
+            <#elseif data.plantType == "normal">SimpleBlockPlacer.INSTANCE
+            <#else>new ColumnPlacer(BiasedToBottomInt.of(2, 4))</#if>)
+            <#if data.plantType == "growapable">.xspread(4).yspread(0).zspread(4).noProjection()</#if>
+            <#if data.plantType == "double" && data.generationType == "Flower">.noProjection()</#if>
+       		.tries(${data.patchSize}).build())
+            .count(${data.frequencyOnChunks})
+        	<#if data.generationType == "Flower" || data.plantType == "growapable">
+        	.rarity(32)</#if>
+        	.squared()
+       		.decorated(Features.Decorators.
+       		<#if data.generateAtAnyHeight>
+                FULL_RANGE
+        	<#else>
+                HEIGHTMAP<#if !(data.generationType == "Grass" || data.plantType == "growapable")>_WORLD_SURFACE</#if>
+            </#if>);
+		return INSTANCE;
+	}
+
+	public static ConfiguredFeature<?, ?> configuredFeature() {
+		return CONFIGURED_FEATURE;
+	}
+
+	public static final Set<ResourceLocation> GENERATE_BIOMES =
+	<#if data.restrictionBiomes?has_content && !cond>
+	Set.of(
+		<#list w.filterBrokenReferences(data.restrictionBiomes) as restrictionBiome>
+		    <#assign expandedBiomes = expandBiomeTag(restrictionBiome)>
+		    <#list expandedBiomes as expandedBiome>
+			new ResourceLocation("${expandedBiome}")<#sep>,
+            </#list>
+        </#list>
+	);
+	<#else>
+	null;
+	</#if>
+
+	<#if data.restrictionBiomes?has_content && cond>
+	private final Set<ResourceKey<Level>> generate_dimensions = Set.of(
+			<#list w.filterBrokenReferences(data.restrictionBiomes) as restrictionBiome>
+	        <#assign biomeName = fixNamespace(restrictionBiome)>
+			<#if biomeName == "#minecraft:is_overworld">
+				Level.OVERWORLD
+			<#elseif biomeName == "#minecraft:is_nether">
+				Level.NETHER
+			<#else>
+				Level.END
+			</#if><#sep>,
+		</#list>
+	);
+
+	@Override public boolean place(FeaturePlaceContext<RandomPatchConfiguration> context) {
 		WorldGenLevel world = context.level();
 		if (!generate_dimensions.contains(world.getLevel().dimension()))
 			return false;
 
-		<#if hasProcedure(data.generateCondition)>
-		int x = context.origin().getX();
-		int y = context.origin().getY();
-		int z = context.origin().getZ();
-		if (!<@procedureOBJToConditionCode data.generateCondition/>)
-			return false;
-		</#if>
-
 		return super.place(context);
 	}
+	</#if>
 }
-
 <#-- @formatter:on -->
+<#function expandBiomeTag biomeTag>
+    <#local result = []>
+
+    <#if biomeTag?contains("#")>
+        <#local biomeName = fixNamespace(biomeTag)>
+        <#local tagKey = "BIOMES:" + biomeName?substring(1)>
+
+        <#local tagFound = false>
+        <#list w.getWorkspace().getTagElements()?keys as tagElement>
+            <#if tagElement.toString().replace("mod:", modid + ":") == tagKey>
+                <#local tagFound = true>
+                <#local biomeValues = w.getWorkspace().getTagElements().get(tagElement)>
+                <#list biomeValues as biomeValue>
+                    <#if biomeValue?starts_with("#")>
+                        <#local expandedSubValues = expandBiomeTag(biomeValue?replace("mod:", modid + ":"))>
+                        <#list expandedSubValues as expandedSubValue>
+                            <#local result = result + [expandedSubValue]>
+                        </#list>
+                    <#else>
+                        <#local result = result + [generator.map(biomeValue, "biomes")]>
+                    </#if>
+                </#list>
+                <#break>
+            </#if>
+        </#list>
+
+        <#if !tagFound>
+            <#local result = result + [biomeName?substring(1)]>
+        </#if>
+    <#else>
+        <#local result = result + [biomeTag]>
+    </#if>
+
+    <#return result>
+</#function>
+<#function fixNamespace input>
+    <#assign noHash = input?starts_with("#")?then(input?substring(1), input)/>
+
+    <#if noHash?contains(":")>
+        <#return input>
+    <#else>
+        <#assign result = "minecraft:" + noHash />
+        <#return input?starts_with("#")?then("#" + result, result)/>
+    </#if>
+</#function>

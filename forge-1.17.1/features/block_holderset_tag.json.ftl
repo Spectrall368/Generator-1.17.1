@@ -1,0 +1,1 @@
+/*@Tag*/BlockTags.createOptional(new ResourceLocation("${field$tag}"))
