@@ -1,0 +1,1 @@
+.rangeTriangle(${input$min}, ${input$max})

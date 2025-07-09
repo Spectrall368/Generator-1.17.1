@@ -1,0 +1,1 @@
+.rarity(${field$rarity})

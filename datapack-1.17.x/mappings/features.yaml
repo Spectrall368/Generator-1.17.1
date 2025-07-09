@@ -8,7 +8,7 @@ feature_no_op:
   - Feature.NO_OP
 feature_lake:
   - LakeFeature
-  - LakeFeature.Configuration
+  - BlockStateConfiguration
   - Feature.LAKE
 feature_simple_block:
   - SimpleBlockFeature
@@ -70,18 +70,10 @@ feature_random_patch:
   - RandomPatchFeature
   - RandomPatchConfiguration
   - Feature.RANDOM_PATCH
-feature_block_column_simple:
-  - BlockColumnFeature
-  - BlockColumnConfiguration
-  - Feature.BLOCK_COLUMN
 feature_geode_simple:
   - GeodeFeature
   - GeodeConfiguration
   - Feature.GEODE
-feature_block_column:
-  - BlockColumnFeature
-  - BlockColumnConfiguration
-  - Feature.BLOCK_COLUMN
 feature_ore:
   - OreFeature
   - OreConfiguration

@@ -1,0 +1,1 @@
+new TagMatchTest(BlockTags.createOptional(new ResourceLocation("${field$tag}")))

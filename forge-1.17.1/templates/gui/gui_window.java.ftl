@@ -246,8 +246,8 @@ public class ${name}Screen extends AbstractContainerScreen<${name}Menu> {
 				<@buttonOnClick component/>
 				)<#if component.isUndecorated>{
                     @Override public void renderButton(PoseStack ms, int mouseX, int mouseY, float partialTick) {
-                        Component text = this.isHovered() ? ComponentUtils.mergeStyles(${component.getName()}.getMessage().copy(), Style.EMPTY.withUnderlined(true)); : ${component.getName()}.getMessage();
-                        drawString(ms, Minecraft.getInstance().fontRenderer, text, ${component.getName()}.x, ${component.getName()}.y, 16777215 | MathHelper.ceil(this.alpha * 255.0F) << 24);
+                        Component text = this.isHovered() ? ComponentUtils.mergeStyles(${component.getName()}.getMessage().copy(), Style.EMPTY.withUnderlined(true)) : ${component.getName()}.getMessage();
+                        drawString(ms, Minecraft.getInstance().font, text, ${component.getName()}.x, ${component.getName()}.y, 16777215 | Mth.ceil(this.alpha * 255.0F) << 24);
                     }
 				}</#if><@buttonDisplayCondition component/>;
 
