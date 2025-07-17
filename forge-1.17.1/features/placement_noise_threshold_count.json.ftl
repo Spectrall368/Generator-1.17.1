@@ -1,0 +1,1 @@
+.decorated(FeatureDecorator.COUNT_NOISE.configured(new NoiseDependantDecoratorConfiguration(${field$threshold}, ${field$belowNoise}, ${field$aboveNoise})))

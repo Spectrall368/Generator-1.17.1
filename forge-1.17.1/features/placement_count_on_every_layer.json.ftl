@@ -1,0 +1,1 @@
+.decorated(FeatureDecorator.COUNT_MULTILAYER.configured(new CountConfiguration(${input$count})))

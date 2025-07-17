@@ -1,0 +1,1 @@
+.decorated(FeatureDecorator.HEIGHTMAP.configured(new HeightmapConfiguration(Heightmap.Types.${field$heightmap})))

@@ -1,0 +1,1 @@
+.decorated(FeatureDecorator.WATER_DEPTH_THRESHOLD.configured(new WaterDepthThresholdConfiguration(${field$depth})))
