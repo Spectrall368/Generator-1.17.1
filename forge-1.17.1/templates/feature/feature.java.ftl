@@ -38,12 +38,6 @@ package ${package}.world.features;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 
-<#if configurationcode?contains("^")>
-    <#assign parts = configurationcode?split("^")>
-    <#assign configurationcode = parts[0]>
-    <#assign configuration = parts[1]>
-    <#assign extends = "Feature<" + configuration + ">">
-</#if>
 <#assign cond = false>
 <#if data.restrictionBiomes?has_content>
 	<#list w.filterBrokenReferences(data.restrictionBiomes) as restrictionBiome>
@@ -65,7 +59,7 @@ public class ${name}Feature extends ${extends} {
 
 	public static Feature<?> feature() {
 		INSTANCE = new ${name}Feature();
-		CONFIGURED_FEATURE = INSTANCE.configured(${configurationcode?keep_before_last(".withCondition")?replace("random.", name + "Feature.random.")})<#if data.hasPlacedFeature()><#if placementcode?contains("£")>${removeParts(placementcode)?replace("random.", name + "Feature.random.")}<#else>${placementcode?remove_ending(",")?replace("random.", name + "Feature.random.")}</#if></#if>;
+		CONFIGURED_FEATURE = INSTANCE.configured(${configurationcode})<#if data.hasPlacedFeature()><#if placementcode?contains("£")>${removeParts(placementcode)}<#else>${placementcode}</#if></#if>;
 
 		return INSTANCE;
 	}
@@ -103,7 +97,7 @@ public class ${name}Feature extends ${extends} {
 	);
 	</#if>
 
-	<#if (data.restrictionBiomes?has_content && cond) || data.hasGenerationConditions() || parts??>
+	<#if (data.restrictionBiomes?has_content && cond) || data.hasGenerationConditions() || placementcode?contains("£")>
 	@Override public boolean place(FeaturePlaceContext<${configuration}> context) {
 		<#-- #4781 - we need to use WorldGenLevel instead of Level, or one can run incompatible procedures in condition -->
 		WorldGenLevel world = context.level();
@@ -120,11 +114,54 @@ public class ${name}Feature extends ${extends} {
 			return false;
 		</#if>
 
-		return <#if parts??>${configurationcode?keep_before(".config()")}.feature()<#else>super</#if>.place(context);
+		<#if placementcode != "" && data.hasPlacedFeature() && placementcode?contains("£")>
+		    BlockPos origin = context.origin();
+            <#list extractParts(placementcode) as part>
+                ${part}
+            </#list>
+            context = new FeaturePlaceContext(context.level(), context.chunkGenerator(), context.random(), origin, context.config());
+		</#if>
+
+		return super.place(context);
 	}
 	</#if>
 }</#compress>
 <#-- @formatter:on -->
+<#function extractParts str>
+    <#assign parts = []>
+    <#assign remainingStr = str>
+
+    <#list 1..str?length as i>
+        <#assign startIndex = remainingStr?index_of('£')>
+        <#if startIndex == -1>
+            <#break>
+        </#if>
+        <#assign endIndex = remainingStr?index_of('^', startIndex)>
+        <#if endIndex == -1>
+            <#break>
+        </#if>
+        <#assign part = remainingStr?substring(startIndex + 1, endIndex)>
+        <#assign parts = parts + [part]>
+        <#assign remainingStr = remainingStr?substring(endIndex + 1)>
+    </#list>
+
+    <#return parts>
+</#function>
+<#function removeParts str>
+    <#assign start = str?index_of("£")>
+
+    <#if start == -1>
+        <#return str>
+    </#if>
+
+    <#assign end = str?index_of("^", start)>
+
+    <#if end == -1>
+        <#return str>
+    </#if>
+
+    <#return removeParts(str?substring(0, start) + str?substring(end + 1))>
+</#function>
 <#function expandBiomeTag biomeTag>
     <#local result = []>
 
