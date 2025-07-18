@@ -1,6 +1,5 @@
 _mcreator_map_template:
   - "@modid:@registryname"
-  - "@NAMEFeature.FEATURE"
   - "@NAMEFeature.CONFIGURED_FEATURE"
 acacia:
   - acacia

@@ -5,7 +5,7 @@ new TreeConfiguration.TreeConfigurationBuilder(${toStateProvidertoFeatureState(i
 <@simpleTrunkPlacer "minecraft:straight_trunk_placer" field$base_height field$height_variation_a field$height_variation_b/>
 <#else>
 <@simpleTrunkPlacer "minecraft:giant_trunk_placer" field$base_height field$height_variation_a field$height_variation_b/>
-</#if>, ${toStateProvidertoFeatureState(input$foliage)},
+</#if>, ${toStateProvidertoFeatureState(input$foliage)}, null,
 <#if field$type == "pine">
 new PineFoliagePlacer(ConstantInt.of(1), ConstantInt.of(1), ${input$foliage_height}), <@twoLayersFeatureSize limit=2 lower_size=0 upper_size=2/>
 <#else>

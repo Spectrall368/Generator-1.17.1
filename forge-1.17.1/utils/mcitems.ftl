@@ -155,7 +155,7 @@
     <#if mappedBlock?starts_with("/*@BlockStateProvider*/")>
         <#return mappedBlock?replace("/*@BlockStateProvider*/", "")>
     <#else>
-        <#return "BlockStateProvider.simple(" + mappedBlockToBlockStateCode(mappedBlock) + ")">
+        <#return "new SimpleStateProvider(" + mappedBlockToBlockStateCode(mappedBlock) + ")">
     </#if>
 </#function>
 

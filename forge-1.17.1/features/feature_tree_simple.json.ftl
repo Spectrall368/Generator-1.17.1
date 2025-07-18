@@ -13,7 +13,7 @@ new TreeConfiguration.TreeConfigurationBuilder(${toStateProvidertoFeatureState(i
 <@simpleTrunkPlacer "minecraft:mega_jungle_trunk_placer" field$base_height field$height_variation_a field$height_variation_b/>
 <#elseif field$type == "fancy oak">
 <@simpleTrunkPlacer "minecraft:fancy_trunk_placer" field$base_height field$height_variation_a field$height_variation_b/>
-</#if>, ${toStateProvidertoFeatureState(input$foliage)},
+</#if>, ${toStateProvidertoFeatureState(input$foliage)}, null,
 <#if field$type == "oak">
 <@simpleFoliagePlacer type="minecraft:blob_foliage_placer" radius=2 offset=0 height=3/>, <@twoLayersFeatureSize limit=1 lower_size=0 upper_size=1/>
 <#elseif field$type == "acacia">
