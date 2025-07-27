@@ -247,17 +247,16 @@ public class ${name}Screen extends AbstractContainerScreen<${name}Menu> implemen
 		<#assign btid = 0>
 
 		<#list buttons as component>
-			<#if component.isUndecorated>
-				${component.getName()} = new PlainTextButton(
-					this.leftPos + ${component.gx(data.width)}, this.topPos + ${component.gy(data.height)},
-					${component.width}, ${component.height},
-					new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}"),
-					<@buttonOnClick component/>, this.font);
-			<#else>
-				${component.getName()} = new Button(this.leftPos + ${component.gx(data.width)}, this.topPos + ${component.gy(data.height)},
+			${component.getName()} = new Button(
+				this.leftPos + ${component.gx(data.width)}, this.topPos + ${component.gy(data.height)},
 				${component.width}, ${component.height},
-				new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}"), <@buttonOnClick component/>);
-			</#if>
+				new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}"),
+				<@buttonOnClick component/>)<#if component.isUndecorated>{
+                    @Override public void renderButton(PoseStack ms, int mouseX, int mouseY, float partialTick) {
+                        Component text = this.isHovered() ? ComponentUtils.mergeStyles(${component.getName()}.getMessage().copy(), Style.EMPTY.withUnderlined(true)) : ${component.getName()}.getMessage();
+                        drawString(ms, Minecraft.getInstance().font, text, ${component.getName()}.x, ${component.getName()}.y, 16777215 | Mth.ceil(this.alpha * 255.0F) << 24);
+                    }
+                }</#if>;
 
 			this.addRenderableWidget(${component.getName()});
 
