@@ -2,10 +2,6 @@ _mcreator_map_template:
   - "@modid:@registryname"
   - "@NAMEFeature.CONFIGURED_FEATURE"
   - "@NAMEFeature"
-_default:
-  - oak
-  - TreeFeatures.OAK
-  - TreeConfiguration
 acacia:
   - acacia
   - Features.ACACIA

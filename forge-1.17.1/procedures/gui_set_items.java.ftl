@@ -1,7 +1,7 @@
 <#include "mcitems.ftl">
-if(${input$entity} instanceof Player _player && _player.containerMenu instanceof ${JavaModName}Menus.MenuAccessor _menu) {
+if(${input$entity} instanceof Player _player && _player.containerMenu instanceof Supplier _current && _current.get() instanceof Map _slots) {
 	ItemStack _setstack = ${mappedMCItemToItemStackCode(input$item, 1)}.copy();
 	_setstack.setCount(${opt.toInt(input$amount)});
-	_menu.getSlots().get(${opt.toInt(input$slotid)}).set(_setstack);
+	((Slot) _slots.get(${opt.toInt(input$slotid)})).set(_setstack);
 	_player.containerMenu.broadcastChanges();
 }

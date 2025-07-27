@@ -1,34 +1,5 @@
 {
-    <#if parent?? && parent.hasGUITexture?? && parent.hasGUITexture()><#assign guiTexture = parent.guiTexture><#elseif data.guiTexture??><#assign guiTexture = data.guiTexture></#if>
-    <#if guiTexture?has_content>
-    "loader": "forge:separate-perspective",
-    "gui_light": "front",
-    "base": { <@modelDefinition/> },
-    "perspectives": {
-        "gui": {
-            "parent": "item/generated",
-            "textures": {
-                "layer0": "${guiTexture.format("%s:item/%s")}"
-            }
-        },
-        "fixed": {
-            "parent": "item/generated",
-            "textures": {
-                "layer0": "${guiTexture.format("%s:item/%s")}"
-            }
-        },
-        "ground": {
-            "parent": "item/generated",
-            "textures": {
-                "layer0": "${guiTexture.format("%s:item/%s")}"
-            }
-        }
-    }
-    <#else>
-    <@modelDefinition/>
-    </#if>
-    <#macro modelDefinition>
-    <#if data.blockingRenderType == 0>
+<#if data.blockingRenderType == 0>
     "parent": "item/handheld",
     "textures": {
         "layer0": "${data.texture.format("%s:item/%s")}"
@@ -49,13 +20,13 @@
             "translation": [ -5, 2, -1 ]
         }
     }
-    <#elseif data.blockingRenderType == 1>
+<#elseif data.blockingRenderType == 1>
     "parent": "${modid}:custom/${data.blockingModelName.split(":")[0]}",
     "textures": {
         <@textures data.getBlockingTextureMap()/>
         "particle": "${data.texture.format("%s:item/%s")}"
     }
-    <#elseif data.blockingRenderType == 2>
+<#elseif data.blockingRenderType == 2>
     "forge_marker": 1,
     "parent": "forge:item/default",
     "loader": "forge:obj",
@@ -64,10 +35,8 @@
         <@textures data.getBlockingTextureMap()/>
         "particle": "${data.texture.format("%s:item/%s")}"
     }
-    </#if>
-    </#macro>
+</#if>
 }
-
 <#macro textures textureMap>
     <#if textureMap??>
         <#list textureMap.entrySet() as texture>

@@ -3,7 +3,7 @@
 {
   "type": "minecraft:block",
   "random_sequence": "${modid}:blocks/${registryname}"
-  <#if data.hasDrops()>,
+  <#if data.dropAmount != 0>,
   "pools": [
     {
       "rolls": 1.0,

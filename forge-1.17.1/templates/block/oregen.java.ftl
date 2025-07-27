@@ -67,7 +67,7 @@ public class ${name}Feature extends OreFeature {
 
 	public static Feature<?> feature() {
 		INSTANCE = new ${name}Feature();
-		CONFIGURED_FEATURE = INSTANCE.configured(new OreConfiguration(${name}FeatureRuleTest.INSTANCE, ${JavaModName}Blocks.${REGISTRYNAME}.get().defaultBlockState(), ${data.frequencyOnChunk}))
+		CONFIGURED_FEATURE = INSTANCE.configured(new OreConfiguration(${name}FeatureRuleTest.INSTANCE, ${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.get().defaultBlockState(), ${data.frequencyOnChunk}))
 				.count(${data.frequencyPerChunks}).squared()
 				.range<#if data.generationShape == "UNIFORM">Uniform<#else>Triangle</#if>(VerticalAnchor.absolute(${minGenerateHeight}), VerticalAnchor.absolute(${maxGenerateHeight}));
 

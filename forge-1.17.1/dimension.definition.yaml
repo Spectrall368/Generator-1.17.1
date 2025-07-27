@@ -58,4 +58,4 @@ localizationkeys:
   - fromlist: data.getFixedSpecialInformation()
     key: item.@modid.@registryname.description_@item_index
 
-field_exclusions: [monsterSpawnLightLimit, monsterSpawnBlockLightLimit, generateAquifers]
+field_exclusions: [generateOreVeins, monsterSpawnLightLimit, monsterSpawnBlockLightLimit, generateAquifers]

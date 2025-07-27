@@ -61,10 +61,11 @@ public class ${name}Block extends ${getPlantClass(data.plantType)}Block
 		<#elseif data.plantType == "sapling">
 		new ${name}TreeGrower(),
 		</#if>
-		BlockBehaviour.Properties.of(Material.PLANT
 		<#if generator.map(data.colorOnMap, "mapcolors") != "DEFAULT">
-		, MaterialColor.${generator.map(data.colorOnMap, "mapcolors")}
-		</#if>)
+		BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.${generator.map(data.colorOnMap, "mapcolors")})
+		<#else>
+		BlockBehaviour.Properties.of(Material.PLANT)
+		</#if>
 		<#if data.plantType == "growapable" || data.plantType == "sapling" || data.forceTicking>
 		.randomTicks()
 		</#if>
@@ -75,7 +76,7 @@ public class ${name}Block extends ${getPlantClass(data.plantType)}Block
 				() -> ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("${data.placeSound}")),
 				() -> ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("${data.hitSound}")),
 				() -> ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("${data.fallSound}"))
-		<#elseif data.soundOnStep != "STONE">
+		<#else>
 			.sound(SoundType.${data.soundOnStep})
 		</#if>
 		<#if data.unbreakable>
@@ -119,8 +120,7 @@ public class ${name}Block extends ${getPlantClass(data.plantType)}Block
 
  	@Override
  	public BlockState getStateForPlacement(BlockPlaceContext context) {
-		BlockState state = super.getStateForPlacement(context);
-		return state == null ? null : state.setValue(WATERLOGGED, context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER);
+ 		return super.getStateForPlacement(context).setValue(WATERLOGGED, context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER);
 	}
 
 	@Override public FluidState getFluidState(BlockState state) {
@@ -158,12 +158,6 @@ public class ${name}Block extends ${getPlantClass(data.plantType)}Block
 	}
 	</#if>
 
-	<#if data.ignitedByLava>
-	@Override public boolean isFlammable(BlockState state, BlockGetter world, BlockPos pos, Direction face) {
-	    return true;
-	}
-	</#if>
-
 	<#if data.flammability != 0>
 	@Override public int getFlammability(BlockState state, BlockGetter world, BlockPos pos, Direction face) {
 		return ${data.flammability};
@@ -176,7 +170,7 @@ public class ${name}Block extends ${getPlantClass(data.plantType)}Block
 	}
 	</#if>
 
-	<#if data.offsetType != "NONE">
+	<#if data.offsetType != "XZ">
 	@Override public BlockBehaviour.OffsetType getOffsetType() {
 		return BlockBehaviour.OffsetType.${data.offsetType};
 	}
@@ -193,10 +187,6 @@ public class ${name}Block extends ${getPlantClass(data.plantType)}Block
 	<#if data.creativePickItem?? && !data.creativePickItem.isEmpty()>
 	@Override public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
 		return ${mappedMCItemToItemStackCode(data.creativePickItem, 1)};
-	}
-	<#elseif !data.hasBlockItem>
-	@Override public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
-		return ItemStack.EMPTY;
 	}
 	</#if>
 
@@ -332,12 +322,12 @@ public class ${name}Block extends ${getPlantClass(data.plantType)}Block
 	@Override public boolean triggerEvent(BlockState state, Level world, BlockPos pos, int eventID, int eventParam) {
 		super.triggerEvent(state, world, pos, eventID, eventParam);
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		return blockEntity != null && blockEntity.triggerEvent(eventID, eventParam);
+		return blockEntity == null ? false : blockEntity.triggerEvent(eventID, eventParam);
 	}
 	</#if>
 
 	@OnlyIn(Dist.CLIENT) public static void registerRenderLayer() {
-		ItemBlockRenderTypes.setRenderLayer(${JavaModName}Blocks.${REGISTRYNAME}.get(), renderType -> renderType == RenderType.cutout());
+		ItemBlockRenderTypes.setRenderLayer(${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.get(), renderType -> renderType == RenderType.cutout());
 	}
 
 	<#if data.tintType != "No tint">
@@ -365,10 +355,10 @@ public class ${name}Block extends ${getPlantClass(data.plantType)}Block
 						Minecraft.getInstance().level.getBiome(pos).getWaterFogColor() : 329011;
 					</#if>
 				</#if>
-			}, ${JavaModName}Blocks.${REGISTRYNAME}.get());
+			}, ${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.get());
 		}
 
-		<#if data.isItemTinted && data.hasBlockItem>
+		<#if data.isItemTinted>
 		@OnlyIn(Dist.CLIENT) public static void itemColorLoad(ColorHandlerEvent.Item event) {
 			event.getItemColors().register((stack, index) -> {
 				<#if data.tintType == "Grass">
@@ -388,7 +378,7 @@ public class ${name}Block extends ${getPlantClass(data.plantType)}Block
 				<#else>
 					return 329011;
 				</#if>
-			}, ${JavaModName}Blocks.${REGISTRYNAME}.get());
+			}, ${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.get());
 		}
 		</#if>
 	</#if>
@@ -405,14 +395,25 @@ public class ${name}Block extends ${getPlantClass(data.plantType)}Block
 <#macro canPlaceOnList blockList condition>
 	<#if (blockList?size > 1) && condition>(</#if>
 	<#list blockList as canBePlacedOn>
-	<#if canBePlacedOn.getUnmappedValue().startsWith("TAG:")>
-	groundState.is(BlockTags.create(new ResourceLocation("${canBePlacedOn.getUnmappedValue().replace("TAG:", "").replace("mod:", modid + ":")}")))
-	<#elseif canBePlacedOn.getMappedValue(1).startsWith("#")>
-	groundState.is(BlockTags.create(new ResourceLocation("${canBePlacedOn.getMappedValue(1)?remove_beginning("#")}")))
-	<#else>
-	groundState.is(${mappedBlockToBlock(canBePlacedOn)})
-	</#if><#sep>||
+	groundState.is(${mappedBlockToBlock(canBePlacedOn)})<#sep>||
 	</#list><#if (blockList?size > 1) && condition>)</#if>
+</#macro>
+<#macro toTreeGrower secondaryChance megaTree="" megaTree2="" tree="" tree2="" flowerTree="" flowerTree2="">
+	<#if (megaTree2?has_content || tree2?has_content || flowerTree2?has_content) && secondaryChance != 0>
+	new TreeGrower("${data.getModElement().getRegistryName()}", ${secondaryChance}f,
+		<@toOptionalTree megaTree/>, <@toOptionalTree megaTree2/>, <@toOptionalTree tree/>,
+		<@toOptionalTree tree2/>, <@toOptionalTree flowerTree/>, <@toOptionalTree flowerTree2/>
+	);
+	<#else>
+	new TreeGrower("${data.getModElement().getRegistryName()}", <@toOptionalTree megaTree/>, <@toOptionalTree tree/>, <@toOptionalTree flowerTree/>);
+	</#if>
+</#macro>
+<#macro toOptionalTree tree="">
+	<#if tree?has_content>
+	Optional.of(getFeatureKey("${generator.map(tree, "configuredfeatures")}"))
+	<#else>
+	Optional.empty()
+	</#if>
 </#macro>
 <#macro initStateProperties>
 this.registerDefaultState(this.stateDefinition.any()

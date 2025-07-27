@@ -1,7 +1,7 @@
 <#--
  # MCreator (https://mcreator.net/)
  # Copyright (C) 2012-2020, Pylo
- # Copyright (C) 2020-2023, Pylo, opensource contributors
+ # Copyright (C) 2020-2021, Pylo, opensource contributors
  #
  # This program is free software: you can redistribute it and/or modify
  # it under the terms of the GNU General Public License as published by
@@ -29,17 +29,15 @@
 -->
 
 <#-- @formatter:off -->
-
 package ${package}.item.inventory;
 
-<#compress>
-@Mod.EventBusSubscriber public class ${name}InventoryCapability implements ICapabilitySerializable<CompoundTag> {
+@Mod.EventBusSubscriber(Dist.CLIENT) public class ${name}InventoryCapability implements ICapabilitySerializable<CompoundTag> {
 
-	@SubscribeEvent public static void onItemDropped(ItemTossEvent event) {
-		if (event.getEntity().getItem().getItem() == ${JavaModName}Items.${REGISTRYNAME}.get()) {
-			Player player = event.getPlayer();
-			if (player.containerMenu instanceof ${data.guiBoundTo}Menu)
-				player.closeContainer();
+	@SubscribeEvent @OnlyIn(Dist.CLIENT) public static void onItemDropped(ItemTossEvent event) {
+		if(event.getEntityItem().getItem().getItem() == ${JavaModName}Items.${data.getModElement().getRegistryNameUpper()}.get()) {
+			if (Minecraft.getInstance().screen instanceof ${data.guiBoundTo}Screen) {
+				Minecraft.getInstance().player.closeContainer();
+			}
 		}
 	}
 
@@ -60,24 +58,24 @@ package ${package}.item.inventory;
 	private ItemStackHandler createItemHandler() {
 		return new ItemStackHandler(${data.inventorySize}) {
 
-			<#if data.inventoryStackSize != 99>
 			@Override public int getSlotLimit(int slot) {
 				return ${data.inventoryStackSize};
 			}
-			</#if>
 
 			@Override public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-				return stack.getItem() != ${JavaModName}Items.${REGISTRYNAME}.get();
+				return stack.getItem() != ${JavaModName}Items.${data.getModElement().getRegistryNameUpper()}.get();
 			}
 
 			@Override public void setSize(int size) {
 			}
+
 		};
 	}
 
 	private ItemStackHandler getItemHandler() {
 		return inventory.orElseThrow(RuntimeException::new);
 	}
+
 }
-</#compress>
+
 <#-- @formatter:on -->
