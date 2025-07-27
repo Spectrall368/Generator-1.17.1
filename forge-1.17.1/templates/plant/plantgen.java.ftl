@@ -54,7 +54,7 @@ public class ${name}Feature extends <#if data.plantType == "normal" && data.gene
 	public static Feature<?> feature() {
 		INSTANCE = new ${name}Feature();
 		CONFIGURED_FEATURE = INSTANCE.configured(
-            new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(${JavaModName}Blocks.${data.getModElement().getRegistryNameUpper()}.get().defaultBlockState()),
+            new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(${JavaModName}Blocks.${REGISTRYNAME}.get().defaultBlockState()),
         	<#if data.plantType == "double">DoublePlantPlacer.INSTANCE
             <#elseif data.plantType == "normal">SimpleBlockPlacer.INSTANCE
             <#else>new ColumnPlacer(BiasedToBottomInt.of(2, 4))</#if>)
