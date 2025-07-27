@@ -1020,7 +1020,7 @@ public class ${name}Entity extends ${extendsClass} <#if interfaces?size gt 0>imp
 
 		@Override public boolean shouldListen(Level world, GameEventListener eventListener, BlockPos vibrationPos, GameEvent holder, Entity context) {
             <#if data.vibrationalEvents?has_content>
-            if(!holder.is(GameEventTags.createOptional(new ResourceLocation("${data.getModElement().getRegistryName()}_can_listen")))) return false;
+            if(!GameEventTags.getAllTags().getTagOrEmpty(new ResourceLocation("${registryname}_can_listen")).contains(holder)) return false;
             </#if>
 			entityOnSignal = context;
 			<#if hasProcedure(data.canReceiveVibrationCondition)>
