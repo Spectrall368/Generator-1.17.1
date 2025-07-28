@@ -103,7 +103,7 @@ public class ${name}Entity extends ${extendsClass} <#if interfaces?size gt 0>imp
 	private Entity entityOnSignal = null;
 	</#if>
 
-	public ${name}Entity(PlayMessages.SpawnEntity packet, Level world) {
+	public ${name}Entity(FMLPlayMessages.SpawnEntity packet, Level world) {
     	this(${JavaModName}Entities.${REGISTRYNAME}.get(), world);
     }
 
