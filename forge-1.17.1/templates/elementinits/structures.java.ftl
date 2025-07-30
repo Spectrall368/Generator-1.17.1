@@ -41,11 +41,11 @@ public class ${JavaModName}Structures {
     private static java.lang.reflect.Method GETCODEC_METHOD;
 
     <#list structures as structure>
-	public static final RegistryObject<${JavaModName}Structure> ${structure.getModElement().getRegistryNameUpper()} =
+	public static final RegistryObject<${JavaModName}StructureBase> ${structure.getModElement().getRegistryNameUpper()} =
 	    register("${structure.getModElement().getRegistryName()}", () -> new ${structure.getModElement().getName()}Structure());
 	</#list>
 
-	private static RegistryObject<${JavaModName}Structure> register(String registryname, Supplier<${JavaModName}Structure> structure) {
+	private static RegistryObject<${JavaModName}StructureBase> register(String registryname, Supplier<${JavaModName}StructureBase> structure) {
         StructureRegistration structureRegistration = new StructureRegistration(REGISTRY.register(registryname, structure));
         STRUCTURE_REGISTRATIONS.add(structureRegistration);
         return structureRegistration.structure();
@@ -124,6 +124,6 @@ public class ${JavaModName}Structures {
             }
 		}
 
-	private static record StructureRegistration (RegistryObject<${JavaModName}Structure> structure) {}
+	private static record StructureRegistration (RegistryObject<${JavaModName}StructureBase> structure) {}
 }
 <#-- @formatter:on -->
