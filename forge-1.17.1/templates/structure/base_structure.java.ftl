@@ -31,9 +31,12 @@
 <#-- @formatter:off -->
 package ${package}.world.structures;
 
-public class BaseStructure extends StructureFeature<StructureConfiguration> {
-    public BaseStructure() {
+public class ${JavaModName}StructureBase extends StructureFeature<StructureConfiguration> {
+    private final String startPool;
+
+    public ${JavaModName}Structure(String startPool) {
         super(StructureConfiguration.CODEC);
+        this.startPool = startPool;
     }
 
     @Override
@@ -41,19 +44,54 @@ public class BaseStructure extends StructureFeature<StructureConfiguration> {
         return null;
     }
 
+    public Set<ResourceLocation> getBiomes() {
+        return null;
+    }
+
+    public Set<ResourceKey<Level>> getDimensions() {
+        return null;
+    }
+
+    public StructureFeatureConfiguration getStructureFeatureConfiguration() {
+        return null;
+    }
+
+    public boolean isSurroundedByLand() {
+        return false;
+    }
+
+    public ConfiguredStructureFeature<?, ?> configuredFeature() {
+        return null;
+    }
+
+    @Override
+    public WeightedRandomList<MobSpawnSettings.SpawnerData> getSpecialEnemies() {
+        return null;
+    }
+
+    @Override
+    public WeightedRandomList<MobSpawnSettings.SpawnerData> getSpecialAnimals() {
+        return null;
+    }
+
+    @Override
+    public WeightedRandomList<MobSpawnSettings.SpawnerData> getSpecialUndergroundWaterAnimals() {
+        return null;
+    }
+
     @Override
     public StructureFeature.StructureStartFactory<StructureConfiguration> getStartFactory() {
         return (feature, chunkPos, n, seed) -> {
-           return new BaseStructure.FeatureStart(this, chunkPos, n, seed);
+           return new ${JavaModName}Structure.FeatureStart(this, chunkPos, n, seed, startPool);
         };
     }
 
     public static class FeatureStart extends NoiseAffectingStructureStart<StructureConfiguration> {
-        private final BaseStructure feature;
+        private final String startPool;
 
-        public FeatureStart(BaseStructure feature, ChunkPos chunkPos, int n, long seed) {
+        public FeatureStart(${JavaModName}StructureBase feature, ChunkPos chunkPos, int n, long seed, String startPool) {
             super(feature, chunkPos, n, seed);
-            this.feature = feature;
+            this.startPool = startPool;
         }
 
         @Override
@@ -67,9 +105,8 @@ public class BaseStructure extends StructureFeature<StructureConfiguration> {
                 blockpos = blockpos.atY(config.startHeight().sample(new Random(), new WorldGenerationContext(chunkGenerator, levelHeightAccessor)));
             }
 
-            Pools.bootstrap();
-            JigsawConfiguration jigsawConfig = new JigsawConfiguration(config.startPool(), config.maxDepth());
-            JigsawPlacement.addPieces(registryAccess, jigsawConfig, PoolElementStructurePiece::new, chunkGenerator, structureManager, blockpos, this, this.random, false, false, levelHeightAccessor);
+            JigsawConfiguration jigsawConfig = new JigsawConfiguration(() -> registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY).get(new ResourceLocation("${modid}:" + startPool)), config.maxDepth());
+            JigsawPlacement.addPieces(registryAccess, jigsawConfig, PoolElementStructurePiece::new, chunkGenerator, structureManager, blockpos, this, this.random, false, !config.projectStartToHeightmap().isEmpty(), levelHeightAccessor);
         }
     }
 }

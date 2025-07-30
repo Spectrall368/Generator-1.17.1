@@ -71,6 +71,8 @@ public class ${name}Feature extends <#if data.plantType == "normal" && data.gene
         	<#else>
                 HEIGHTMAP<#if !(data.generationType == "Grass" || data.plantType == "growapable")>_WORLD_SURFACE</#if>
             </#if>);
+
+        Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, new ResourceLocation("${modid}:${registryname}"), CONFIGURED_FEATURE);
 		return INSTANCE;
 	}
 

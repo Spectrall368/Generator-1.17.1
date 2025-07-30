@@ -31,11 +31,9 @@
 <#-- @formatter:off -->
 package ${package}.world.structures.configurations;
 
-public record StructureConfiguration(Supplier<StructureTemplatePool> startPool, int maxDepth, HeightProvider startHeight, Optional<Heightmap.Types> projectStartToHeightmap, int maxDistanceFromCenter) implements FeatureConfiguration {
+public record StructureConfiguration(int maxDepth, HeightProvider startHeight, Optional<Heightmap.Types> projectStartToHeightmap, int maxDistanceFromCenter) implements FeatureConfiguration {
     public static final Codec<StructureConfiguration> CODEC = RecordCodecBuilder.create(builder -> {
-        return builder.group(StructureTemplatePool.CODEC.fieldOf("start_pool").forGetter(config -> {
-            return config.startPool;
-        }), Codec.intRange(0, 7).fieldOf("size").forGetter(config -> {
+        return builder.group(Codec.intRange(0, 7).fieldOf("size").forGetter(config -> {
             return config.maxDepth;
         }), HeightProvider.CODEC.fieldOf("start_height").forGetter(config -> {
             return config.startHeight;

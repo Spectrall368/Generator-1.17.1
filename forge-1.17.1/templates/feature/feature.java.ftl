@@ -61,6 +61,7 @@ public class ${name}Feature extends ${extends} {
 		INSTANCE = new ${name}Feature();
 		CONFIGURED_FEATURE = INSTANCE.configured(${configurationcode})<#if data.hasPlacedFeature()><#if placementcode?contains("£")>${removeParts(placementcode)}<#else>${placementcode}</#if></#if>;
 
+		Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, new ResourceLocation("${modid}:${registryname}"), CONFIGURED_FEATURE);
 		return INSTANCE;
 	}
 

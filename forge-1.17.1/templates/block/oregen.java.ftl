@@ -71,6 +71,7 @@ public class ${name}Feature extends OreFeature {
 				.count(${data.frequencyPerChunks}).squared()
 				.range<#if data.generationShape == "UNIFORM">Uniform<#else>Triangle</#if>(VerticalAnchor.absolute(${minGenerateHeight}), VerticalAnchor.absolute(${maxGenerateHeight}));
 
+        Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, new ResourceLocation("${modid}:${registryname}"), CONFIGURED_FEATURE);
 		return INSTANCE;
 	}
 

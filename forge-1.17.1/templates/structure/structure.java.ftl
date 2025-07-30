@@ -29,12 +29,120 @@
 -->
 
 <#-- @formatter:off -->
+<#assign cond = false>
+<#if data.restrictionBiomes?has_content>
+	<#list w.filterBrokenReferences(data.restrictionBiomes) as restrictionBiome>
+	    <#assign biomeName = fixNamespace(restrictionBiome)>
+        <#if biomeName == "#minecraft:is_overworld" || biomeName == "#minecraft:is_nether" || biomeName == "#minecraft:is_end">
+			<#assign cond = true>
+			 <#break>
+		</#if>
+	</#list>
+</#if>
 package ${package}.world.structures;
 
-public class ${name}Structure extends BaseStructure {
+public class ${name}Structure extends ${JavaModName}StructureBase {
+    private static final StructureConfiguration INSTANCE = new StructureConfiguration(${[data.size, 7]?min}, <#if data.useStartHeight>${data.startHeightProviderType?replace("UNIFORM", "UniformHeight")?replace("BIASED_TO_BOTTOM", "BiasedToBottomHeight")?replace("VERY_BIASED_TO_BOTTOM", "VeryBiasedToBottomHeight")?replace("TRAPEZOID", "TrapezoidHeight")}.of(VerticalAnchor.absolute(${data.startHeightMin}), VerticalAnchor.absolute(${data.startHeightMax}))<#else>ConstantHeight.of(VerticalAnchor.absolute(0))</#if>, Optional.<#if !data.useStartHeight>of(Heightmap.Types.${data.surfaceDetectionType}<#else>empty(</#if>), ${data.maxDistanceFromCenter});
+
+    public ${name}Structure() {
+        super("${registryname}");
+    }
 
     @Override
     public GenerationStep.Decoration step() {
         return GenerationStep.Decoration.${generator.map(data.generationStep, "generationsteps")};
     }
+
+    <#if data.restrictionBiomes?has_content && !cond>
+    @Override public Set<ResourceLocation> getBiomes() {
+        return Set.of(
+            <#list w.filterBrokenReferences(data.restrictionBiomes) as restrictionBiome>
+                <#assign expandedBiomes = expandBiomeTag(restrictionBiome)>
+                <#list expandedBiomes as expandedBiome>
+                new ResourceLocation("${expandedBiome}")<#sep>,
+                </#list><#sep>,
+            </#list>
+        );
+    }
+	</#if>
+
+    <#if data.restrictionBiomes?has_content && cond>
+    @Override public Set<ResourceKey<Level>> getDimensions() {
+        return Set.of(
+			<#list w.filterBrokenReferences(data.restrictionBiomes) as restrictionBiome>
+	        <#assign biomeName = fixNamespace(restrictionBiome)>
+			<#if biomeName == "#minecraft:is_overworld">
+				Level.OVERWORLD
+			<#elseif biomeName == "#minecraft:is_nether">
+				Level.NETHER
+			<#else>
+				Level.END
+			</#if><#sep>,
+		</#list>
+        );
+	}
+	</#if>
+
+    @Override
+    public StructureFeatureConfiguration getStructureFeatureConfiguration() {
+        return new StructureFeatureConfiguration(${data.spacing}, ${data.separation}, ${thelper.randompositiveint(registryname)});
+    }
+
+    <#if data.terrainAdaptation != "none">
+    @Override
+    public boolean isSurroundedByLand() {
+        return true;
+    }
+	</#if>
+
+    @Override
+    public ConfiguredStructureFeature<?, ?> configuredFeature() {
+        return ${JavaModName}Structures.${REGISTRYNAME}.get().configured(INSTANCE);
+    }
 }
+<#-- @formatter:on -->
+<#function expandBiomeTag biomeTag>
+    <#local result = []>
+
+    <#if biomeTag?contains("#")>
+        <#local biomeName = fixNamespace(biomeTag)>
+        <#local tagKey = "BIOMES:" + biomeName?substring(1)>
+
+        <#local tagFound = false>
+        <#list w.getWorkspace().getTagElements()?keys as tagElement>
+            <#if tagElement.toString().replace("mod:", modid + ":") == tagKey>
+                <#local tagFound = true>
+                <#local biomeValues = w.getWorkspace().getTagElements().get(tagElement)>
+                <#list biomeValues as biomeValue>
+                    <#if biomeValue?starts_with("#")>
+                        <#local expandedSubValues = expandBiomeTag(biomeValue?replace("mod:", modid + ":"))>
+                        <#list expandedSubValues as expandedSubValue>
+                            <#local result = result + [expandedSubValue]>
+                        </#list>
+                    <#else>
+                        <#local result = result + [generator.map(biomeValue, "biomes")]>
+                    </#if>
+                </#list>
+                <#break>
+            </#if>
+        </#list>
+
+        <#if !tagFound>
+            <#local result = result + [biomeName?substring(1)]>
+        </#if>
+    <#else>
+        <#local result = result + [biomeTag]>
+    </#if>
+
+    <#return result>
+</#function>
+<#function fixNamespace input>
+    <#assign noHash = input?starts_with("#")?then(input?substring(1), input)/>
+
+    <#if noHash?contains(":")>
+        <#return input>
+    <#else>
+        <#assign result = "minecraft:" + noHash />
+        <#return input?starts_with("#")?then("#" + result, result)/>
+    </#if>
+</#function>

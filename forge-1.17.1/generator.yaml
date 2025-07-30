@@ -86,6 +86,7 @@ base_templates:
     condition_any:
       - "${w.getGElementsOfType('gamerule')?filter(e -> e.type.equals('Number') || e.type.equals('Logic'))?size != 0}"
       - "${w.hasElementsOfType('dimension')}"
+      - "${w.hasElementsOfType('structure')}"
       - "${w.hasElementsOfType('feature')}"
       - "${w.getGElementsOfType('tool')?filter(e -> e.toolType.equals('Fishing rod'))?size != 0}"
   - template: elementinits/javamodels.java.ftl

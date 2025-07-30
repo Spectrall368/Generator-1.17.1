@@ -34,12 +34,96 @@
  */
 package ${package}.init;
 
+@Mod.EventBusSubscriber
 public class ${JavaModName}Structures {
     public static final DeferredRegister<StructureFeature<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.STRUCTURE_FEATURES, ${JavaModName}.MODID);
+	private static final List<StructureRegistration> STRUCTURE_REGISTRATIONS = new ArrayList<>();
+    private static java.lang.reflect.Method GETCODEC_METHOD;
 
     <#list structures as structure>
-	public static final RegistryObject<StructureFeature<?>> ${structure.getModElement().getRegistryNameUpper()} =
-	    REGISTRY.register("${structure.getModElement().getRegistryName()}", () -> new ${structure.getModElement().getName()}Structure());
+	public static final RegistryObject<${JavaModName}Structure> ${structure.getModElement().getRegistryNameUpper()} =
+	    register("${structure.getModElement().getRegistryName()}", () -> new ${structure.getModElement().getName()}Structure());
 	</#list>
+
+	private static RegistryObject<${JavaModName}Structure> register(String registryname, Supplier<${JavaModName}Structure> structure) {
+        StructureRegistration structureRegistration = new StructureRegistration(REGISTRY.register(registryname, structure));
+        STRUCTURE_REGISTRATIONS.add(structureRegistration);
+        return structureRegistration.structure();
+	}
+
+    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+    private static class InitClass {
+        @SubscribeEvent public static void init(FMLCommonSetupEvent event) {
+            event.enqueueWork(() -> {
+                for (StructureRegistration registration : STRUCTURE_REGISTRATIONS) {
+                    ${JavaModName}StructureBase structure = registration.structure().get();
+                    StructureFeatureConfiguration configuration = structure.getStructureFeatureConfiguration();
+
+                    StructureFeature.STRUCTURES_REGISTRY.put(structure.getRegistryName().toString(), structure);
+
+                    if(structure.isSurroundedByLand()) {
+                        StructureFeature.NOISE_AFFECTING_FEATURES = ImmutableList.<StructureFeature<?>>builder()
+                            .addAll(StructureFeature.NOISE_AFFECTING_FEATURES).add(structure).build();
+                    }
+
+                    StructureSettings.DEFAULTS = ImmutableMap.<StructureFeature<?>, StructureFeatureConfiguration>builder()
+                        .putAll(StructureSettings.DEFAULTS).put(structure, configuration).build();
+
+                    BuiltinRegistries.NOISE_GENERATOR_SETTINGS.entrySet().forEach(settings -> {
+                        Map<StructureFeature<?>, StructureFeatureConfiguration> structureMap = settings.getValue().structureSettings().structureConfig();
+
+                        if(structureMap instanceof ImmutableMap) {
+                            Map<StructureFeature<?>, StructureFeatureConfiguration> tempMap = new HashMap<>(structureMap);
+                            tempMap.put(structure, configuration);
+                            settings.getValue().structureSettings().structureConfig = tempMap;
+                        } else {
+                            structureMap.put(structure, configuration);
+                        }
+                    });
+
+                    Registry.register(BuiltinRegistries.CONFIGURED_STRUCTURE_FEATURE, structure.getRegistryName().toString(), structure.configuredFeature());
+                }
+            });
+        }
+    }
+
+	@SubscribeEvent(priority = EventPriority.HIGH) public static void addFeaturesToBiomes(BiomeLoadingEvent event) {
+		for (StructureRegistration registration : STRUCTURE_REGISTRATIONS) {
+            ${JavaModName}StructureBase structure = registration.structure().get();
+			if (structure.getBiomes() == null || structure.getBiomes().contains(event.getName()))
+				event.getGeneration().getStructures().add(() -> structure.configuredFeature());
+		}
+	}
+
+		@SubscribeEvent public static void addDimensionalSpacing(WorldEvent.Load event) {
+            if(event.getWorld() instanceof ServerLevel serverWorld) {
+
+            try {
+                if(GETCODEC_METHOD == null) GETCODEC_METHOD = ObfuscationReflectionHelper.findMethod(ChunkGenerator.class, "func_230347_a_");
+                ResourceLocation cgRL = Registry.CHUNK_GENERATOR.getKey((Codec<? extends ChunkGenerator>) GETCODEC_METHOD.invoke(serverWorld.getChunkSource().generator));
+                if(cgRL != null && cgRL.getNamespace().equals("terraforged")) return;
+            } catch(Exception e) {}
+
+            if(serverWorld.getChunkSource().getGenerator() instanceof FlatLevelSource && serverWorld.dimension().equals(Level.OVERWORLD)) {
+                return;
+            }
+
+            Map<StructureFeature<?>, StructureFeatureConfiguration> tempMap = new HashMap<>(serverWorld.getChunkSource().generator.getSettings().structureConfig());
+
+            for (StructureRegistration registration : STRUCTURE_REGISTRATIONS) {
+                if (registration.structure().get().getDimensions() != null && !registration.structure().get().getDimensions().contains(serverWorld.dimension())) {
+                    tempMap.remove(registration.structure().get());
+                    continue;
+                }
+
+                tempMap.putIfAbsent(registration.structure().get(), StructureSettings.DEFAULTS.get(registration.structure().get()));
+
+            }
+
+            serverWorld.getChunkSource().generator.getSettings().structureConfig = tempMap;
+            }
+		}
+
+	private static record StructureRegistration (RegistryObject<${JavaModName}Structure> structure) {}
 }
 <#-- @formatter:on -->

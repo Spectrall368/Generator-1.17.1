@@ -1,12 +1,6 @@
 templates:
   - template: structure/structure.java.ftl
     name: "@SRCROOT/@BASEPACKAGEPATH/world/structures/@NAMEStructure.java"
-  - template: structure/structure_set.json.ftl # loaded from datapack generator
-    writer: json
-    name: "@MODDATAROOT/worldgen/structure_set/@registryname.json"
-  - template: structure/structure.json.ftl # loaded from datapack generator
-    writer: json
-    name: "@MODDATAROOT/worldgen/configured_structure_feature/@registryname.json"
   - template: structure/template_pool.json.ftl # loaded from datapack generator
     writer: json
     name: "@MODDATAROOT/worldgen/template_pool/@registryname.json"
@@ -25,7 +19,7 @@ global_templates:
     name: "@SRCROOT/@BASEPACKAGEPATH/init/@JavaModNameStructures.java"
   - template: structure/base_structure.java.ftl
     writer: java
-    name: "@SRCROOT/@BASEPACKAGEPATH/world/structures/BaseStructure.java"
+    name: "@SRCROOT/@BASEPACKAGEPATH/world/structures/@JavaModNameStructureBase.java"
     hidden: true
   - template: structure/structure_configuration.java.ftl
     writer: java
