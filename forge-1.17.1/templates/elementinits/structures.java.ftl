@@ -38,7 +38,6 @@ package ${package}.init;
 public class ${JavaModName}Structures {
     public static final DeferredRegister<StructureFeature<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.STRUCTURE_FEATURES, ${JavaModName}.MODID);
 	private static final List<StructureRegistration> STRUCTURE_REGISTRATIONS = new ArrayList<>();
-    private static java.lang.reflect.Method GETCODEC_METHOD;
 
     <#list structures as structure>
 	public static final RegistryObject<${JavaModName}StructureBase> ${structure.getModElement().getRegistryNameUpper()} =
@@ -96,14 +95,8 @@ public class ${JavaModName}Structures {
 		}
 	}
 
-		@SubscribeEvent public static void addDimensionalSpacing(WorldEvent.Load event) {
+	@SubscribeEvent public static void addDimensionalSpacing(WorldEvent.Load event) {
             if(event.getWorld() instanceof ServerLevel serverWorld) {
-
-            try {
-                if(GETCODEC_METHOD == null) GETCODEC_METHOD = ObfuscationReflectionHelper.findMethod(ChunkGenerator.class, "func_230347_a_");
-                ResourceLocation cgRL = Registry.CHUNK_GENERATOR.getKey((Codec<? extends ChunkGenerator>) GETCODEC_METHOD.invoke(serverWorld.getChunkSource().generator));
-                if(cgRL != null && cgRL.getNamespace().equals("terraforged")) return;
-            } catch(Exception e) {}
 
             if(serverWorld.getChunkSource().getGenerator() instanceof FlatLevelSource && serverWorld.dimension().equals(Level.OVERWORLD)) {
                 return;
@@ -124,7 +117,7 @@ public class ${JavaModName}Structures {
 
             serverWorld.getChunkSource().generator.getSettings().structureConfig = tempMap;
             }
-		}
+	}
 
 	private static record StructureRegistration (RegistryObject<${JavaModName}StructureBase> structure) {}
 }
