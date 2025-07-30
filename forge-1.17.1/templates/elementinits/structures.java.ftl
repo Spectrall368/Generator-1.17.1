@@ -42,7 +42,7 @@ public class ${JavaModName}Structures {
 
     <#list structures as structure>
 	public static final RegistryObject<${JavaModName}StructureBase> ${structure.getModElement().getRegistryNameUpper()} =
-	    register("${structure.getModElement().getRegistryName()}", () -> new ${structure.getModElement().getName()}Structure());
+	    register("${structure.getModElement().getRegistryName()}", ${structure.getModElement().getName()}Structure::new);
 	</#list>
 
 	private static RegistryObject<${JavaModName}StructureBase> register(String registryname, Supplier<${JavaModName}StructureBase> structure) {
@@ -58,8 +58,9 @@ public class ${JavaModName}Structures {
                 for (StructureRegistration registration : STRUCTURE_REGISTRATIONS) {
                     ${JavaModName}StructureBase structure = registration.structure().get();
                     StructureFeatureConfiguration configuration = structure.getStructureFeatureConfiguration();
+                    String id = structure.getRegistryName().toString();
 
-                    StructureFeature.STRUCTURES_REGISTRY.put(structure.getRegistryName().toString(), structure);
+                    StructureFeature.STRUCTURES_REGISTRY.put(id, structure);
 
                     if(structure.isSurroundedByLand()) {
                         StructureFeature.NOISE_AFFECTING_FEATURES = ImmutableList.<StructureFeature<?>>builder()
@@ -81,7 +82,7 @@ public class ${JavaModName}Structures {
                         }
                     });
 
-                    Registry.register(BuiltinRegistries.CONFIGURED_STRUCTURE_FEATURE, structure.getRegistryName().toString(), structure.configuredFeature());
+                    Registry.register(BuiltinRegistries.CONFIGURED_STRUCTURE_FEATURE, id, structure.configuredFeature());
                 }
             });
         }
@@ -111,12 +112,13 @@ public class ${JavaModName}Structures {
             Map<StructureFeature<?>, StructureFeatureConfiguration> tempMap = new HashMap<>(serverWorld.getChunkSource().generator.getSettings().structureConfig());
 
             for (StructureRegistration registration : STRUCTURE_REGISTRATIONS) {
-                if (registration.structure().get().getDimensions() != null && !registration.structure().get().getDimensions().contains(serverWorld.dimension())) {
-                    tempMap.remove(registration.structure().get());
+                ${JavaModName}StructureBase structure = registration.structure().get();
+                if (structure.getDimensions() != null && !structure.getDimensions().contains(serverWorld.dimension())) {
+                    tempMap.remove(structure);
                     continue;
                 }
 
-                tempMap.putIfAbsent(registration.structure().get(), StructureSettings.DEFAULTS.get(registration.structure().get()));
+                tempMap.putIfAbsent(structure, StructureSettings.DEFAULTS.get(structure));
 
             }
 

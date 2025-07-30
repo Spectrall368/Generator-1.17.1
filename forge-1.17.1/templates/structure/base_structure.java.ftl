@@ -34,7 +34,7 @@ package ${package}.world.structures;
 public class ${JavaModName}StructureBase extends StructureFeature<StructureConfiguration> {
     private final String startPool;
 
-    public ${JavaModName}Structure(String startPool) {
+    public ${JavaModName}StructureBase(String startPool) {
         super(StructureConfiguration.CODEC);
         this.startPool = startPool;
     }
@@ -82,11 +82,11 @@ public class ${JavaModName}StructureBase extends StructureFeature<StructureConfi
     @Override
     public StructureFeature.StructureStartFactory<StructureConfiguration> getStartFactory() {
         return (feature, chunkPos, n, seed) -> {
-           return new ${JavaModName}Structure.FeatureStart(this, chunkPos, n, seed, startPool);
+           return new FeatureStart(this, chunkPos, n, seed, startPool);
         };
     }
 
-    public static class FeatureStart extends NoiseAffectingStructureStart<StructureConfiguration> {
+    protected static class FeatureStart extends NoiseAffectingStructureStart<StructureConfiguration> {
         private final String startPool;
 
         public FeatureStart(${JavaModName}StructureBase feature, ChunkPos chunkPos, int n, long seed, String startPool) {
@@ -96,17 +96,25 @@ public class ${JavaModName}StructureBase extends StructureFeature<StructureConfi
 
         @Override
         public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, StructureConfiguration config, LevelHeightAccessor levelHeightAccessor) {
-            BlockPos blockpos = chunkPos.getMiddleBlockPosition(0);
-
-            if (!config.projectStartToHeightmap().isEmpty()) {
-                int topLandY = chunkGenerator.getFirstFreeHeight(blockpos.getX(), blockpos.getZ(), config.projectStartToHeightmap().get(), levelHeightAccessor);
-                blockpos = blockpos.atY(topLandY + config.startHeight().sample(new Random(), new WorldGenerationContext(chunkGenerator, levelHeightAccessor)));
-            } else {
-                blockpos = blockpos.atY(config.startHeight().sample(new Random(), new WorldGenerationContext(chunkGenerator, levelHeightAccessor)));
-            }
+            int topLandY = config.startHeight().sample(random, new WorldGenerationContext(chunkGenerator, levelHeightAccessor));
+            BlockPos blockpos = new BlockPos(chunkPos.getMinBlockX(), topLandY, chunkPos.getMinBlockZ());
 
             JigsawConfiguration jigsawConfig = new JigsawConfiguration(() -> registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY).get(new ResourceLocation("${modid}:" + startPool)), config.maxDepth());
-            JigsawPlacement.addPieces(registryAccess, jigsawConfig, PoolElementStructurePiece::new, chunkGenerator, structureManager, blockpos, this, this.random, false, !config.projectStartToHeightmap().isEmpty(), levelHeightAccessor);
+
+            Pools.bootstrap();
+
+            JigsawPlacement.PieceFactory factory = PoolElementStructurePiece::new;
+
+            if (config.projectStartToHeightmap().isPresent()) {
+                Rotation rotation = Rotation.getRandom(random);
+                StructurePoolElement element = jigsawConfig.startPool().get().getRandomTemplate(random);
+                BoundingBox box = factory.create(structureManager, element, blockpos, element.getGroundLevelDelta(), rotation, element.getBoundingBox(structureManager, blockpos, rotation)).getBoundingBox();
+                int i = (box.maxX() + box.minX()) / 2;
+                int j = (box.maxZ() + box.minZ()) / 2;
+                blockpos = blockpos.atY(blockpos.getY() + chunkGenerator.getFirstFreeHeight(i, j, config.projectStartToHeightmap().get(), levelHeightAccessor));
+            }
+
+            JigsawPlacement.addPieces(registryAccess, jigsawConfig, factory, chunkGenerator, structureManager, blockpos, this, this.random, false, false, levelHeightAccessor);
         }
     }
 }
