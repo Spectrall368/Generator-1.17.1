@@ -34,8 +34,7 @@
  */
 package ${package}.init;
 
-@Mod.EventBusSubscriber
-public class ${JavaModName}Structures {
+@Mod.EventBusSubscriber public class ${JavaModName}Structures {
     public static final DeferredRegister<StructureFeature<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.STRUCTURE_FEATURES, ${JavaModName}.MODID);
 	private static final List<StructureRegistration> STRUCTURE_REGISTRATIONS = new ArrayList<>();
 
