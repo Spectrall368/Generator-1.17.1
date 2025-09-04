@@ -23,8 +23,8 @@ bamboo_no_podzol:
   - Features.BAMBOO_LIGHT
   - ProbabilityFeatureConfiguration
 bamboo_some_podzol:
-  - bamboo_some_podzol
-  - Features.BAMBOO_SOME_PODZOL
+  - bamboo
+  - Features.BAMBOO
   - ProbabilityFeatureConfiguration
 bamboo_vegetation:
   - bamboo_vegetation
@@ -120,7 +120,7 @@ delta:
   - DeltaFeatureConfiguration
 desert_well:
   - desert_well
-  - Features.DESERT_WELL
+  - Features.WELL
   - NoneFeatureConfiguration
 disk_clay:
   - disk_clay
@@ -259,8 +259,8 @@ jungle_tree_no_vine:
   - Features.JUNGLE_TREE_NO_VINE
   - TreeConfiguration
 kelp:
-  - kelp
-  - Features.KELP
+  - kelp_warm
+  - Features.KELP_WARM
   - NoneFeatureConfiguration
 lake_lava:
   - lake_lava
@@ -278,10 +278,6 @@ lush_caves_clay:
   - lush_caves_clay
   - Features.LUSH_CAVES_CLAY
   - RandomBooleanFeatureConfiguration
-meadow_trees:
-  - meadow_trees
-  - Features.MEADOW_TREES
-  - RandomFeatureConfiguration
 mega_jungle_tree:
   - mega_jungle_tree
   - Features.MEGA_JUNGLE_TREE
@@ -314,10 +310,6 @@ moss_vegetation:
   - moss_vegetation
   - Features.MOSS_VEGETATION
   - SimpleBlockConfiguration
-mushroom_island_vegetation:
-  - mushroom_island_vegetation
-  - Features.MUSHROOM_ISLAND_VEGETATION
-  - RandomBooleanFeatureConfiguration
 nether_sprouts:
   - nether_sprouts
   - Features.NETHER_SPROUTS
@@ -343,12 +335,12 @@ oak_bees_005:
   - Features.OAK_BEES_005
   - TreeConfiguration
 ore_ancient_debris_large:
-  - ore_ancient_debris_large
-  - Features.ORE_ANCIENT_DEBRIS_LARGE
+  - ore_debris_large
+  - Features.ORE_DEBRIS_LARGE
   - OreConfiguration
 ore_ancient_debris_small:
-  - ore_ancient_debris_small
-  - Features.ORE_ANCIENT_DEBRIS_SMALL
+  - ore_debris_small
+  - Features.ORE_DEBRIS_SMALL
   - OreConfiguration
 ore_andesite:
   - ore_andesite
@@ -367,28 +359,28 @@ ore_coal:
   - Features.ORE_COAL
   - OreConfiguration
 ore_coal_buried:
-  - ore_coal_buried
-  - Features.ORE_COAL_BURIED
+  - prototype_ore_coal_lower
+  - Features.PROTOTYPE_ORE_COAL_LOWER
   - OreConfiguration
 ore_copper_large:
   - prototype_ore_copper
   - Features.PROTOTYPE_ORE_COPPER
   - OreConfiguration
 ore_copper_small:
-  - ore_copper_small
-  - Features.ORE_COPPPER_SMALL
+  - ore_copper
+  - Features.ORE_COPPER
   - OreConfiguration
 ore_diamond_buried:
-  - ore_diamond_buried
-  - Features.ORE_DIAMOND_BURIED
+  - ore_diamond
+  - Features.ORE_DIAMOND
   - OreConfiguration
 ore_diamond_large:
-  - ore_diamond_large
+  - prototype_ore_diamond_large
   - Features.PROTOTYPE_ORE_DIAMOND_LARGE
   - OreConfiguration
 ore_diamond_small:
-  - ore_diamond_small
-  - Features.ORE_DIAMOND_SMALL
+  - prototype_ore_diamond
+  - Features.PROTOTYPE_ORE_DIAMOND
   - OreConfiguration
 ore_diorite:
   - ore_diorite
@@ -407,8 +399,8 @@ ore_gold:
   - Features.ORE_GOLD
   - OreConfiguration
 ore_gold_buried:
-  - ore_gold_buried
-  - Features.ORE_GOLD_BURIED
+  - prototype_ore_gold
+  - Features.PROTOTYPE_ORE_GOLD
   - OreConfiguration
 ore_granite:
   - ore_granite
@@ -431,24 +423,24 @@ ore_iron:
   - Features.ORE_IRON
   - OreConfiguration
 ore_iron_small:
-  - ore_iron_small
-  - Features.ORE_IRON_SMALL
+  - prototype_ore_iron_small
+  - Features.PROTOTYPE_ORE_IRON_SMALL
   - OreConfiguration
 ore_lapis:
   - ore_lapis
   - Features.ORE_LAPIS
   - OreConfiguration
 ore_lapis_buried:
-  - ore_lapis_buried
-  - Features.ORE_LAPIS_BURIED
+  - prototype_ore_lapis_buried
+  - Features.PROTOTYPE_ORE_LAPIS_BURIED
   - OreConfiguration
 ore_magma:
   - ore_magma
   - Features.ORE_MAGMA
   - OreConfiguration
 ore_nether_gold:
-  - ore_nether_gold
-  - Features.ORE_NETHER_GOLD
+  - ore_gold_nether
+  - Features.ORE_GOLD_NETHER
   - OreConfiguration
 ore_quartz:
   - ore_quartz_nether
@@ -491,8 +483,8 @@ patch_fire:
   - Features.PATCH_FIRE
   - RandomPatchConfiguration
 patch_grass:
-  - patch_grass
-  - Features.PATCH_GRASS
+  - patch_grass_plain
+  - Features.PATCH_GRASS_PLAIN
   - RandomPatchConfiguration
 patch_grass_jungle:
   - patch_grass_jungle
@@ -571,9 +563,9 @@ sea_pickle:
   - Features.SEA_PICKLE
   - CountConfiguration
 seagrass_mid:
-  - seagrass_mid
-  - Features.SEAGRASS_MID
-  - ProbabilityFeatureConfiguration
+  - seagrass_simple
+  - Features.SEAGRASS_SIMPLE
+  - SimpleBlockConfiguration
 seagrass_short:
   - seagrass_simple
   - Features.SEAGRASS_SIMPLE
@@ -635,8 +627,8 @@ trees_birch_and_oak:
   - Features.TREES_BIRCH_AND_OAK
   - RandomFeatureConfiguration
 trees_flower_forest:
-  - trees_flower_forest
-  - Features.TREES_FLOWER_FOREST
+  - forest_flower_trees
+  - Features.FOREST_FLOWER_TREES
   - RandomFeatureConfiguration
 trees_jungle:
   - trees_jungle
