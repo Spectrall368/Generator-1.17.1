@@ -595,23 +595,23 @@ spore_blossom:
   - Features.SPORE_BLOSSOM_FEATURE
   - SimpleBlockConfiguration
 spring_lava_frozen:
-  - spring_lava_frozen
-  - Features.SPRING_LAVA_FROZEN
+  - spring_lava
+  - Features.SPRING_LAVA
   - SpringConfiguration
 spring_lava_nether:
-  - spring_lava_nether
-  - Features.SPRING_LAVA_NETHER
+  - spring_lava
+  - Features.SPRING_LAVA
   - SpringConfiguration
 spring_lava_overworld:
-  - spring_lava_overworld
-  - Features.SPRING_LAVA_OVERWORLD
+  - spring_lava
+  - Features.SPRING_LAVA
   - SpringConfiguration
 spring_nether_closed:
-  - spring_nether_closed
+  - spring_lava
   - Features.SPRING_LAVA
   - SpringConfiguration
 spring_nether_open:
-  - spring_nether_open
+  - spring_lava
   - Features.SPRING_LAVA
   - SpringConfiguration
 spring_water:
