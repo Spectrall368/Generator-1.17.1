@@ -679,8 +679,8 @@ trees_sparse_jungle:
   - Features.TREES_SPARSE_JUNGLE
   - RandomFeatureConfiguration
 trees_taiga:
-  - trees_taiga
-  - Features.TREES_TAIGA
+  - taiga_vegetation
+  - Features.TAIGA_VEGETATION
   - RandomFeatureConfiguration
 trees_water:
   - trees_water
