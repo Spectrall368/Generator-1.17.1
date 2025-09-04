@@ -106,6 +106,14 @@ feature_underwater_magma:
   - UnderwaterMagmaFeature
   - UnderwaterMagmaConfiguration
   - Feature.PROTOTYPE_UNDERWATER_MAGMA
+feature_disk_simple:
+  - DiskReplaceFeature
+  - DiskConfiguration
+  - Feature.DISK
+feature_disk:
+  - DiskReplaceFeature
+  - DiskConfiguration
+  - Feature.DISK
 feature_tree_simple:
   - TreeFeature
   - TreeConfiguration

@@ -65,7 +65,7 @@ public class ${name}Feature extends ${generator.map(featuretype, "features")} {
 
 	public static Feature<?> feature() {
 		FEATURE = new ${name}Feature();
-		CONFIGURED_FEATURE = <#if featuretype == "configured_feature_reference">${configurationcode}<#else>FEATURE.configured(${configurationcode})</#if><#if data.hasPlacedFeature()>${nonHardcodedElements}</#if>;
+		CONFIGURED_FEATURE = <#if featuretype == "configured_feature_reference">${configurationcode}<#else>FEATURE.configured(<#if configurationcode == "">NoneFeatureConfiguration.INSTANCE<#else>${configurationcode}</#if>)</#if><#if data.hasPlacedFeature()>${nonHardcodedElements}</#if>;
 
 		Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, new ResourceLocation("${modid}:${registryname}"), CONFIGURED_FEATURE);
 
