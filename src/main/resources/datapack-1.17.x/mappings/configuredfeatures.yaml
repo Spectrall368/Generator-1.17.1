@@ -1,6 +1,6 @@
 _mcreator_map_template:
   - "@modid:@registryname"
-  - "@NAMEFeature.CONFIGURED_FEATURE"
+  - "@NAMEFeature.configuredFeature()"
   - "@NAMEFeature"
 _default:
   - oak

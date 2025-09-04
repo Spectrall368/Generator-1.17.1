@@ -22,7 +22,7 @@ world.setBlock(${toBlockPos(input$x,input$y,input$z)}, ${mappedBlockToBlockState
 	BlockEntity _be = world.getBlockEntity(_bp);
 	CompoundTag _bnbt = null;
 	if(_be != null) {
-		_bnbt = _be.saveWithFullMetadata();
+		_bnbt = _be.save(new CompoundTag());
 		_be.setRemoved();
 	}
 	</#if>

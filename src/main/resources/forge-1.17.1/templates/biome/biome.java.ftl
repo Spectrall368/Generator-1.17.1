@@ -146,7 +146,7 @@ public class ${name}Biome {
 
         <#if data.spawnRuinedPortal != "NONE">
           <#if data.spawnRuinedPortal == "STANDARD">
-            biomeGenerationSettings.addStructureStart(StructureFeatures.RUINED_PORTAL);
+            biomeGenerationSettings.addStructureStart(StructureFeatures.RUINED_PORTAL_STANDARD);
           <#else>
             biomeGenerationSettings.addStructureStart(StructureFeatures.RUINED_PORTAL_${data.spawnRuinedPortal});
           </#if>
@@ -159,10 +159,10 @@ public class ${name}Biome {
         	biomeGenerationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
 				register("trees", Feature.TREE.configured((new TreeConfiguration.TreeConfigurationBuilder(
                     new SimpleStateProvider(${ct?then(mappedBlockToBlockStateCode(data.treeStem), "Blocks.JUNGLE_LOG.defaultBlockState()")}),
+                    new MegaJungleTrunkPlacer(${ct?then([data.minHeight, 32]?min, 10)}, 2, 19),
                     new SimpleStateProvider(${ct?then(mappedBlockToBlockStateCode(data.treeBranch), "Blocks.JUNGLE_LEAVES.defaultBlockState()")}),
                     new SimpleStateProvider(Blocks.OAK_SAPLING.defaultBlockState()),
                     new MegaJungleFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 2),
-		    new MegaJungleTrunkPlacer(${ct?then([data.minHeight, 32]?min, 10)}, 2, 19),
                     new TwoLayersFeatureSize(1, 1, 2)))
                     <#if data.hasVines() || data.hasFruits()>
                     	<@vinesAndFruits/>
@@ -176,10 +176,10 @@ public class ${name}Biome {
         	biomeGenerationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
                 register("trees", Feature.TREE.configured((new TreeConfiguration.TreeConfigurationBuilder(
                     new SimpleStateProvider(${ct?then(mappedBlockToBlockStateCode(data.treeStem), "Blocks.ACACIA_LOG.defaultBlockState()")}),
+                    new ForkingTrunkPlacer(${ct?then([data.minHeight, 32]?min, 5)}, 2, 2),
                     new SimpleStateProvider(${ct?then(mappedBlockToBlockStateCode(data.treeBranch), "Blocks.ACACIA_LEAVES.defaultBlockState()")}),
                     new SimpleStateProvider(Blocks.ACACIA_SAPLING.defaultBlockState()),
                     new AcaciaFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0)),
-                    new ForkingTrunkPlacer(${ct?then([data.minHeight, 32]?min, 5)}, 2, 2),
                     new TwoLayersFeatureSize(1, 0, 2)))
                     <#if data.hasVines() || data.hasFruits()>
                     	<@vinesAndFruits/>
@@ -193,10 +193,10 @@ public class ${name}Biome {
         	biomeGenerationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
 				register("trees", Feature.TREE.configured((new TreeConfiguration.TreeConfigurationBuilder(
                     new SimpleStateProvider(${ct?then(mappedBlockToBlockStateCode(data.treeStem), "Blocks.SPRUCE_LOG.defaultBlockState()")}),
+                    new GiantTrunkPlacer(${ct?then([data.minHeight, 32]?min, 13)}, 2, 14),
                     new SimpleStateProvider(${ct?then(mappedBlockToBlockStateCode(data.treeBranch), "Blocks.SPRUCE_LEAVES.defaultBlockState()")}),
                     new SimpleStateProvider(Blocks.SPRUCE_SAPLING.defaultBlockState()),
                     new MegaPineFoliagePlacer(ConstantInt.of(0), ConstantInt.of(0), UniformInt.of(3, 4)),
-                    new GiantTrunkPlacer(${ct?then([data.minHeight, 32]?min, 13)}, 2, 14),
                     new TwoLayersFeatureSize(1, 1, 2)))
                     <#if data.hasVines() || data.hasFruits()>
                     	<@vinesAndFruits/>
@@ -208,10 +208,10 @@ public class ${name}Biome {
         	biomeGenerationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
 				register("trees", Feature.TREE.configured((new TreeConfiguration.TreeConfigurationBuilder(
                     new SimpleStateProvider(${ct?then(mappedBlockToBlockStateCode(data.treeStem), "Blocks.SPRUCE_LOG.defaultBlockState()")}),
+                    new GiantTrunkPlacer(${ct?then([data.minHeight, 32]?min, 13)}, 2, 14),
                     new SimpleStateProvider(${ct?then(mappedBlockToBlockStateCode(data.treeBranch), "Blocks.SPRUCE_LEAVES.defaultBlockState()")}),
                     new SimpleStateProvider(Blocks.SPRUCE_SAPLING.defaultBlockState()),
                     new MegaPineFoliagePlacer(ConstantInt.of(0), ConstantInt.of(0), UniformInt.of(13, 4)),
-                    new GiantTrunkPlacer(${ct?then([data.minHeight, 32]?min, 13)}, 2, 14),
                     new TwoLayersFeatureSize(1, 1, 2)))
                     .decorators(ImmutableList.of(new AlterGroundDecorator(new SimpleStateProvider(Blocks.PODZOL.defaultBlockState()))))
                     <#if data.hasVines() || data.hasFruits()>
@@ -224,10 +224,10 @@ public class ${name}Biome {
         	biomeGenerationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
 				register("trees", Feature.TREE.configured((new TreeConfiguration.TreeConfigurationBuilder(
                     new SimpleStateProvider(${ct?then(mappedBlockToBlockStateCode(data.treeStem), "Blocks.BIRCH_LOG.defaultBlockState()")}),
+                    new StraightTrunkPlacer(${ct?then([data.minHeight, 32]?min, 5)}, 2, 0),
                     new SimpleStateProvider(${ct?then(mappedBlockToBlockStateCode(data.treeBranch), "Blocks.BIRCH_LEAVES.defaultBlockState()")}),
                     new SimpleStateProvider(Blocks.BIRCH_SAPLING.defaultBlockState()),
                     new BlobFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 3),
-                    new StraightTrunkPlacer(${ct?then([data.minHeight, 32]?min, 5)}, 2, 0),
                     new TwoLayersFeatureSize(1, 0, 1)))
                     <#if data.hasVines() || data.hasFruits()>
                     	<@vinesAndFruits/>
@@ -241,10 +241,10 @@ public class ${name}Biome {
         	biomeGenerationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION,
 				register("trees", Feature.TREE.configured((new TreeConfiguration.TreeConfigurationBuilder(
                     new SimpleStateProvider(${ct?then(mappedBlockToBlockStateCode(data.treeStem), "Blocks.OAK_LOG.defaultBlockState()")}),
+                    new StraightTrunkPlacer(${ct?then([data.minHeight, 32]?min, 4)}, 2, 0),
                     new SimpleStateProvider(${ct?then(mappedBlockToBlockStateCode(data.treeBranch), "Blocks.OAK_LEAVES.defaultBlockState()")}),
                     new SimpleStateProvider(Blocks.OAK_SAPLING.defaultBlockState()),
                     new BlobFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 3),
-                    new StraightTrunkPlacer(${ct?then([data.minHeight, 32]?min, 4)}, 2, 0),
                     new TwoLayersFeatureSize(1, 0, 1)))
                     <#if data.hasVines() || data.hasFruits()>
                     	<@vinesAndFruits/>

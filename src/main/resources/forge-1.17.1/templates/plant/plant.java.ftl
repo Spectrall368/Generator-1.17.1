@@ -130,7 +130,7 @@ public class ${name}Block extends ${getPlantClass(data.plantType)}Block
 
  	@Override public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor world, BlockPos currentPos, BlockPos facingPos) {
  		if (state.getValue(WATERLOGGED)) {
- 			world.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
+ 			world.getBlockTicks().scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
  		}
  		return super.updateShape(state, facing, facingState, world, currentPos, facingPos);
  	}

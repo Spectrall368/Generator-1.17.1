@@ -1,1 +1,1 @@
-$origin = origin.atY(${input$height});$
+$origin = origin.atY(${input$height}.sample(context.random(), world));$
