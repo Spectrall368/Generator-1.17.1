@@ -1,2 +1,2 @@
 <#include "mcelements.ftl">
-new RandomFeatureConfiguration(List.of(<#list input_list$feature as feature>${toPlacedFeature(input_id_list$feature[feature?index], feature)}weighted(${field_list$chance[feature?index]}f)<#sep>,</#list>), ${toPlacedFeature(input_id$default, input$default)})
+new RandomFeatureConfiguration(List.of(<#list input_list$feature as feature>${toPlacedFeature(input_id_list$feature[feature?index], feature)}.weighted(${field_list$chance[feature?index]}f)<#sep>,</#list>), ${toPlacedFeature(input_id$default, input$default)})
