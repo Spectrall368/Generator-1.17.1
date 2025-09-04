@@ -108,7 +108,7 @@ crimson_fungus_planted:
   - HugeFungusConfiguration
 dark_forest_vegetation:
   - dark_forest_vegetation
-  - Features.DARK_FOREST_VEGETATION
+  - Features.DARK_FOREST_VEGETATION_BROWN
   - RandomFeatureConfiguration
 dark_oak:
   - dark_oak
@@ -216,7 +216,7 @@ fossil_coal:
   - FossilFeatureConfiguration
 fossil_diamonds:
   - fossil_diamonds
-  - Features.FOSSIL_DIAMONDS
+  - Features.PROTOTYPE_FOSSIL_LOWER
   - FossilFeatureConfiguration
 freeze_top_layer:
   - freeze_top_layer
@@ -544,7 +544,7 @@ patch_tall_grass:
   - RandomPatchConfiguration
 patch_waterlily:
   - patch_waterlily
-  - Features.PATCH_WATERLILY
+  - Features.PATCH_WATERLILLY
   - RandomPatchConfiguration
 pile_hay:
   - pile_hay
@@ -637,10 +637,6 @@ spring_water:
 spruce:
   - spruce
   - Features.SPRUCE
-  - TreeConfiguration
-super_birch_bees:
-  - super_birch_bees
-  - Features.SUPER_BIRCH_BEES
   - TreeConfiguration
 super_birch_bees_0002:
   - super_birch_bees_0002
