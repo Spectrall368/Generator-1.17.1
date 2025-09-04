@@ -170,7 +170,7 @@ public class ${name}Entity extends AbstractArrow implements ItemSupplier {
 
 		<#if (data.modelWidth > 0.5) || (data.modelHeight > 0.5)>
 		if (!this.isNoPhysics()) {
-			for (VoxelShape collision : this.level.getBlockCollisions(this, this.getBoundingBox())) {
+			this.level.getBlockCollisions(this, this.getBoundingBox()).forEach(collision -> {
 				for (AABB blockAABB : collision.toAabbs()) {
 					if (this.getBoundingBox().intersects(blockAABB)) {
 						BlockPos blockPos = new BlockPos((int) blockAABB.minX, (int) blockAABB.minY, (int) blockAABB.minZ);
@@ -179,7 +179,7 @@ public class ${name}Entity extends AbstractArrow implements ItemSupplier {
 						this.onHitBlock(new BlockHitResult(intersectionPoint, hitDirection, blockPos, false));
 					}
 				}
-			}
+			});
 		}
 		</#if>
 

@@ -33,8 +33,9 @@
 package ${package}.world.features.treedecorators;
 
 public class ${name}LeaveDecorator extends LeaveVineDecorator {
-    public static final Codec<${name}LeaveDecorator> CODEC = Codec.unit(${name}LeaveDecorator::new);
-    public static final TreeDecoratorType<?> DECORATOR_TYPE = new TreeDecoratorType<>(CODEC);
+    public static final ${name}LeaveDecorator INSTANCE = new ${name}LeaveDecorator();
+    private static final Codec<${name}LeaveDecorator> CODEC = Codec.unit(() -> INSTANCE);
+    private static final TreeDecoratorType<?> DECORATOR_TYPE = new TreeDecoratorType<>(CODEC);
 
     static {
         DECORATOR_TYPE.setRegistryName("${modid}:${registryname}_tree_leave_decorator");

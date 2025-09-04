@@ -38,7 +38,7 @@ package ${package}.item;
 <#compress>
 public class ${name}Item extends <#if data.hasBannerPatterns()>BannerPattern<#elseif data.isMusicDisc>Record</#if>Item {
 	public ${name}Item() {
-    super(<#if data.hasBannerPatterns()>${JavaModName}BannerPatterns.${generator.getResourceLocationForModElement(data.providedBannerPatterns[0])?keep_after(":")?upper_case},
+    super(<#if data.hasBannerPatterns()>null,
                 <#elseif data.isMusicDisc>
                 ${data.musicDiscAnalogOutput}, () -> ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("${data.musicDiscMusic}")),
                 </#if>new Item.Properties()
