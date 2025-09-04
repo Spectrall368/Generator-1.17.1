@@ -203,8 +203,8 @@ flower_swamp:
   - Features.FLOWER_SWAMP
   - RandomPatchConfiguration
 forest_flowers:
-  - forest_flowers
-  - Features.FOREST_FLOWERS
+  - forest_flower_vegetation_common
+  - Features.FOREST_FLOWER_VEGETATION_COMMON
   - SimpleRandomFeatureConfiguration
 forest_rock:
   - forest_rock
