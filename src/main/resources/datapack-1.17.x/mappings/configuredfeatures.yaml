@@ -150,10 +150,6 @@ end_gateway_delayed:
   - end_gateway_delayed
   - Features.END_GATEWAY_DELAYED
   - EndGatewayConfiguration
-end_gateway_return:
-  - end_gateway_return
-  - Features.END_GATEWAY_RETURN
-  - EndGatewayConfiguration
 end_island:
   - end_island
   - Features.END_ISLAND
@@ -455,8 +451,8 @@ ore_nether_gold:
   - Features.ORE_NETHER_GOLD
   - OreConfiguration
 ore_quartz:
-  - ore_quartz
-  - Features.ORE_QUARTZ
+  - ore_quartz_nether
+  - Features.ORE_QUARTZ_NETHER
   - OreConfiguration
 ore_redstone:
   - ore_redstone
@@ -566,10 +562,6 @@ pine:
   - pine
   - Features.PINE
   - TreeConfiguration
-pointed_dripstone:
-  - pointed_dripstone
-  - Features.POINTED_DRIPSTONE
-  - PointedDripstoneConfiguration
 rooted_azalea_tree:
   - rooted_azalea_trees
   - Features.ROOTED_AZALEA_TREES
@@ -583,13 +575,13 @@ seagrass_mid:
   - Features.SEAGRASS_MID
   - ProbabilityFeatureConfiguration
 seagrass_short:
-  - seagrass_short
-  - Features.SEAGRASS_SHORT
-  - ProbabilityFeatureConfiguration
+  - seagrass_simple
+  - Features.SEAGRASS_SIMPLE
+  - SimpleBlockConfiguration
 seagrass_slightly_less_short:
-  - seagrass_short
-  - Features.SEAGRASS_SHORT
-  - ProbabilityFeatureConfiguration
+  - seagrass_simple
+  - Features.SEAGRASS_SIMPLE
+  - SimpleBlockConfiguration
 seagrass_tall:
   - seagrass_tall
   - Features.SEAGRASS_TALL
@@ -715,12 +707,12 @@ warped_forest_vegetation_bonemeal:
   - Features.WARPED_FOREST_VEGETATION_BONEMEAL
   - NetherForestVegetationConfig
 warped_fungus:
-  - warped_fungus
-  - Features.WARPED_FUNGUS
+  - warped_fungi
+  - Features.WARPED_FUNGI
   - HugeFungusConfiguration
 warped_fungus_planted:
-  - warped_fungus_planted
-  - Features.WARPED_FUNGUS_PLANTED
+  - warped_fungi_planted
+  - Features.WARPED_FUNGI_PLANTED
   - HugeFungusConfiguration
 weeping_vines:
   - weeping_vines
