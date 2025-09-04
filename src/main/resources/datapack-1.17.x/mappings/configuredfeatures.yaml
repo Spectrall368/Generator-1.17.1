@@ -19,8 +19,8 @@ azalea_tree:
   - Features.AZALEA_TREE
   - TreeConfiguration
 bamboo_no_podzol:
-  - bamboo_no_podzol
-  - Features.BAMBOO_NO_PODZOL
+  - bamboo_light
+  - Features.BAMBOO_LIGHT
   - ProbabilityFeatureConfiguration
 bamboo_some_podzol:
   - bamboo_some_podzol
@@ -95,16 +95,16 @@ crimson_forest_vegetation:
   - Features.CRIMSON_FOREST_VEGETATION
   - NetherForestVegetationConfig
 crimson_forest_vegetation_bonemeal:
-  - crimson_forest_vegetation_bonemeal
-  - Features.CRIMSON_FOREST_VEGETATION_BONEMEAL
+  - crimson_forest_vegetation
+  - Features.CRIMSON_FOREST_VEGETATION
   - NetherForestVegetationConfig
 crimson_fungus:
-  - crimson_fungus
-  - Features.CRIMSON_FUNGUS
+  - crimson_fungi
+  - Features.CRIMSON_FUNGI
   - HugeFungusConfiguration
 crimson_fungus_planted:
-  - crimson_fungus_planted
-  - Features.CRIMSON_FUNGUS_PLANTED
+  - crimson_fungi_planted
+  - Features.CRIMSON_FUNGI_PLANTED
   - HugeFungusConfiguration
 dark_forest_vegetation:
   - dark_forest_vegetation
@@ -591,8 +591,8 @@ seagrass_short:
   - Features.SEAGRASS_SHORT
   - ProbabilityFeatureConfiguration
 seagrass_slightly_less_short:
-  - seagrass_slightly_less_short
-  - Features.SEAGRASS_SLIGHTLY_LESS_SHORT
+  - seagrass_short
+  - Features.SEAGRASS_SHORT
   - ProbabilityFeatureConfiguration
 seagrass_tall:
   - seagrass_tall
@@ -695,8 +695,8 @@ twisting_vines:
   - Features.TWISTING_VINES
   - TwistingVinesConfig
 twisting_vines_bonemeal:
-  - twisting_vines_bonemeal
-  - Features.TWISTING_VINES_BONEMEAL
+  - twisting_vines
+  - Features.TWISTING_VINES
   - TwistingVinesConfig
 underwater_magma:
   - underwater_magma
