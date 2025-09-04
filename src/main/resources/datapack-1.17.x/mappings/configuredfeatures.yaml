@@ -575,8 +575,8 @@ seagrass_slightly_less_short:
   - Features.SEAGRASS_SIMPLE
   - SimpleBlockConfiguration
 seagrass_tall:
-  - seagrass_tall
-  - Features.SEAGRASS_TALL
+  - seagrass_deep
+  - Features.SEAGRASS_DEEP
   - ProbabilityFeatureConfiguration
 small_basalt_columns:
   - small_basalt_columns
@@ -623,8 +623,8 @@ swamp_oak:
   - Features.SWAMP_OAK
   - TreeConfiguration
 trees_birch_and_oak:
-  - trees_birch_and_oak
-  - Features.TREES_BIRCH_AND_OAK
+  - trees_birch
+  - Features.BIRCH_OTHER
   - RandomFeatureConfiguration
 trees_flower_forest:
   - forest_flower_trees
@@ -647,12 +647,12 @@ trees_plains:
   - Features.PLAIN_VEGETATION
   - RandomFeatureConfiguration
 trees_savanna:
-  - trees_savanna
-  - Features.TREES_SAVANNA
+  - trees_water
+  - Features.TREES_WATER
   - RandomFeatureConfiguration
 trees_sparse_jungle:
-  - trees_sparse_jungle
-  - Features.TREES_SPARSE_JUNGLE
+  - trees_jungle_edge
+  - Features.TREES_JUNGLE_EDGE
   - RandomFeatureConfiguration
 trees_taiga:
   - taiga_vegetation
@@ -663,8 +663,8 @@ trees_water:
   - Features.TREES_WATER
   - RandomFeatureConfiguration
 trees_windswept_hills:
-  - trees_windswept_hills
-  - Features.TREES_WINDSWEPT_HILLS
+  - trees_mountain
+  - Features.TREES_MOUNTAIN
   - RandomFeatureConfiguration
 twisting_vines:
   - twisting_vines
@@ -675,8 +675,8 @@ twisting_vines_bonemeal:
   - Features.TWISTING_VINES
   - TwistingVinesConfig
 underwater_magma:
-  - underwater_magma
-  - Features.UNDERWATER_MAGMA
+  - prototype_underwater_magma
+  - Features.PROTOTYPE_UNDERWATER_MAGMA
   - UnderwaterMagmaConfiguration
 vines:
   - vines
@@ -695,8 +695,8 @@ warped_forest_vegetation:
   - Features.WARPED_FOREST_VEGETATION
   - NetherForestVegetationConfig
 warped_forest_vegetation_bonemeal:
-  - warped_forest_vegetation_bonemeal
-  - Features.WARPED_FOREST_VEGETATION_BONEMEAL
+  - warped_forest_vegetation
+  - Features.WARPED_FOREST_VEGETATION
   - NetherForestVegetationConfig
 warped_fungus:
   - warped_fungi
