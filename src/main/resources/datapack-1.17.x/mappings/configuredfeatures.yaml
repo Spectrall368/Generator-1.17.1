@@ -211,11 +211,11 @@ forest_rock:
   - Features.FOREST_ROCK
   - BlockStateConfiguration
 fossil_coal:
-  - fossil_coal
-  - Features.FOSSIL_COAL
+  - prototype_fossil_upper
+  - Features.PROTOTYPE_FOSSIL_UPPER
   - FossilFeatureConfiguration
 fossil_diamonds:
-  - fossil_diamonds
+  - prototype_fossil_lower
   - Features.PROTOTYPE_FOSSIL_LOWER
   - FossilFeatureConfiguration
 freeze_top_layer:
@@ -331,8 +331,8 @@ nether_sprouts:
   - Features.NETHER_SPROUTS
   - NetherForestVegetationConfig
 nether_sprouts_bonemeal:
-  - nether_sprouts_bonemeal
-  - Features.NETHER_SPROUTS_BONEMEAL
+  - nether_sprouts
+  - Features.NETHER_SPROUTS
   - NetherForestVegetationConfig
 oak:
   - oak

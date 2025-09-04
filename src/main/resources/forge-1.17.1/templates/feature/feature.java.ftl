@@ -129,7 +129,7 @@ public class ${name}Feature extends ${generator.map(featuretype, "features")} {
             </#list>
 		</#if>
 
-		return super.place(<#if (hardcodedElements?size > 0)>new FeaturePlaceContext(world, context.chunkGenerator(), context.random(), origin, context.config())<#else>context</#if>);
+		return super.place(<#if (hardcodedElements?size > 0)>new FeaturePlaceContext<>(world, context.chunkGenerator(), context.random(), origin, context.config())<#else>context</#if>);
 	}
 	</#if>
 }</#compress>
