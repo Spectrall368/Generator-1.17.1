@@ -37,17 +37,26 @@
 </#function>
 
 <#function toPlacedFeature featureType featureConfig placement="">
+    <#local placementPattern = r'\$([^$]+)\$'>
+    <#local placementMatches = placement?matches(placementPattern)>
+    <#local hasHardcodedElements = (placementMatches?size > 0)>
+    <#local nonHardcodedElements = placement>
+
+    <#if hasHardcodedElements>
+        <#local nonHardcodedElements = placement?replace(placementPattern, "", "r")>
+    </#if>
+
 	<#if featureType == "placed_feature_inline">
 		<#return featureConfig>
 	<#else>
         <#if featureType == "configured_feature_reference" && placement == "">
-		        <#return 'PlacementUtils.inlinePlaced(' + featureConfig + ')'>
+		        <#return featureConfig>
         <#elseif featureType == "configured_feature_reference">
-		        <#return 'PlacementUtils.inlinePlaced(' + featureConfig + ',' + placement?remove_ending(",") + ')'>
+		        <#return featureConfig + nonHardcodedElements>
 		<#elseif placement == "">
-		        <#return 'PlacementUtils.inlinePlaced(' + generator.map(featureType, "features", 2) + ', ' + featureConfig + ')'>
+		        <#return generator.map(featureType, "features", 2) + featureConfig>
 		<#else>
-		        <#return 'PlacementUtils.inlinePlaced(' + generator.map(featureType, "features", 2) + ', ' + featureConfig + ',' + placement?remove_ending(",") + ')'>
+		        <#return generator.map(featureType, "features", 2) + featureConfig + nonHardcodedElements>
 		</#if>
 	</#if>
 </#function>

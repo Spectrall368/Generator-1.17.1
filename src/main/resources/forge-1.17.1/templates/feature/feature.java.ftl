@@ -32,12 +32,11 @@
 <#include "../procedures.java.ftl">
 <#include "../mcitems.ftl">
 package ${package}.world.features;
-<#assign configuration = generator.map(featuretype, "features", 1)>
-<#assign extends = generator.map(featuretype, "features")>
 
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 
+<#assign configuration = generator.map(featuretype, "features", 1)>
 <#assign cond = false>
 <#if data.restrictionBiomes?has_content>
 	<#list w.filterBrokenReferences(data.restrictionBiomes) as restrictionBiome>
@@ -48,21 +47,29 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvi
 		</#if>
 	</#list>
 </#if>
+<#assign placementPattern = r'\$([^$]+)\$'>
+<#assign placementMatches = placementcode?matches(placementPattern)>
+<#assign hardcodedElements = []>
+<#list placementMatches as match>
+    <#assign hardcodedElements = hardcodedElements + [match?groups[1]]>
+</#list>
+<#assign nonHardcodedElements = placementcode?replace(placementPattern, "", "r")>
 <#compress>
-public class ${name}Feature extends ${extends} {
-    private static ${name}Feature INSTANCE = null;
-  	private static ConfiguredFeature<?, ?> CONFIGURED_FEATURE = null;
+public class ${name}Feature extends ${generator.map(featuretype, "features")} {
+	private static ${name}Feature FEATURE = null;
+	private static ConfiguredFeature<?, ?> CONFIGURED_FEATURE = null;
 
 	public ${name}Feature() {
 		super(${configuration}.CODEC);
 	}
 
 	public static Feature<?> feature() {
-		INSTANCE = new ${name}Feature();
-		CONFIGURED_FEATURE = INSTANCE.configured(${configurationcode})<#if data.hasPlacedFeature()><#if placementcode?contains("£")>${removeParts(placementcode)}<#else>${placementcode}</#if></#if>;
+		FEATURE = new ${name}Feature();
+		CONFIGURED_FEATURE = <#if featuretype == "configured_feature_reference">${configurationcode}<#else>FEATURE.configured(${configurationcode})</#if><#if data.hasPlacedFeature()>${nonHardcodedElements}</#if>;
 
 		Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, new ResourceLocation("${modid}:${registryname}"), CONFIGURED_FEATURE);
-		return INSTANCE;
+
+		return FEATURE;
 	}
 
 	public static ConfiguredFeature<?, ?> configuredFeature() {
@@ -78,10 +85,10 @@ public class ${name}Feature extends ${extends} {
 			new ResourceLocation("${expandedBiome}")<#sep>,
 		    </#list><#sep>,
         </#list>
-	);
+	)
 	<#else>
-	null;
-	</#if>
+	null
+	</#if>;
 
     <#if data.restrictionBiomes?has_content && cond>
 	private final Set<ResourceKey<Level>> generateDimensions = Set.of(
@@ -98,71 +105,35 @@ public class ${name}Feature extends ${extends} {
 	);
 	</#if>
 
-	<#if (data.restrictionBiomes?has_content && cond) || data.hasGenerationConditions() || placementcode?contains("£")>
+	<#if data.hasPlacedFeature() && ((data.restrictionBiomes?has_content && cond) || data.hasGenerationConditions() || (hardcodedElements?size > 0))>
 	@Override public boolean place(FeaturePlaceContext<${configuration}> context) {
 		<#-- #4781 - we need to use WorldGenLevel instead of Level, or one can run incompatible procedures in condition -->
 		WorldGenLevel world = context.level();
+		BlockPos origin = context.origin();
 		<#if data.restrictionBiomes?has_content && cond>
 		if (!generateDimensions.contains(world.getLevel().dimension()))
 			return false;
 		</#if>
 
 		<#if hasProcedure(data.generateCondition)>
-		int x = context.origin().getX();
-		int y = context.origin().getY();
-		int z = context.origin().getZ();
+		int x = origin.getX();
+		int y = origin.getY();
+		int z = origin.getZ();
 		if (!<@procedureOBJToConditionCode data.generateCondition/>)
 			return false;
 		</#if>
 
-		<#if placementcode != "" && data.hasPlacedFeature() && placementcode?contains("£")>
-		    BlockPos origin = context.origin();
-            <#list extractParts(placementcode) as part>
-                ${part}
+		<#if data.hasPlacedFeature() && (hardcodedElements?size > 0)>
+            <#list hardcodedElements as elemento>
+            ${elemento}
             </#list>
-            context = new FeaturePlaceContext(context.level(), context.chunkGenerator(), context.random(), origin, context.config());
 		</#if>
 
-		return super.place(context);
+		return super.place(<#if (hardcodedElements?size > 0)>new FeaturePlaceContext(world, context.chunkGenerator(), context.random(), origin, context.config())<#else>context</#if>);
 	}
 	</#if>
 }</#compress>
 <#-- @formatter:on -->
-<#function extractParts str>
-    <#assign parts = []>
-    <#assign remainingStr = str>
-
-    <#list 1..str?length as i>
-        <#assign startIndex = remainingStr?index_of('£')>
-        <#if startIndex == -1>
-            <#break>
-        </#if>
-        <#assign endIndex = remainingStr?index_of('^', startIndex)>
-        <#if endIndex == -1>
-            <#break>
-        </#if>
-        <#assign part = remainingStr?substring(startIndex + 1, endIndex)>
-        <#assign parts = parts + [part]>
-        <#assign remainingStr = remainingStr?substring(endIndex + 1)>
-    </#list>
-
-    <#return parts>
-</#function>
-<#function removeParts str>
-    <#assign start = str?index_of("£")>
-
-    <#if start == -1>
-        <#return str>
-    </#if>
-
-    <#assign end = str?index_of("^", start)>
-
-    <#if end == -1>
-        <#return str>
-    </#if>
-
-    <#return removeParts(str?substring(0, start) + str?substring(end + 1))>
-</#function>
 <#function expandBiomeTag biomeTag>
     <#local result = []>
 

@@ -1,1 +1,1 @@
-(world.getLevel().getBlockState(origin).getBlock() == Blocks.AIR || world.getLevel().getBlockState(origin).getBlock() == Blocks.WATER)
+(isAir(world, origin) || world.getBlockState(origin).getBlock() == Blocks.WATER)

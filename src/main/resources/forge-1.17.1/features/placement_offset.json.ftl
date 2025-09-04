@@ -1,1 +1,1 @@
-£origin = origin.offset(${input$xz}, ${input$y}, ${input$xz});^
+$origin = origin.offset(${input$xz}, ${input$y}, ${input$xz});$

@@ -1,1 +1,1 @@
-ImmutableList.of(Fluids.${generator.map(field$fluid, "fluids")}.defaultBlockState()).contains(world.getLevel().getFluidState(origin<#if (field$x != "0")||(field$y != "0")||(field$z != "0")>.offset(${field$x}, ${field$y}, ${field$z})</#if>).getBlockState())
+Set.of(${generator.map(field$fluid, "fluids")}.getDefaultState()).contains(world.getFluidState(origin<#if (field$x != "0")||(field$y != "0")||(field$z != "0")>.offset(${field$x}, ${field$y}, ${field$z})</#if>).getBlockState())
