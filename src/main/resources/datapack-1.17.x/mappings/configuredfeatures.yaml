@@ -272,7 +272,7 @@ large_basalt_columns:
   - ColumnFeatureConfiguration
 large_dripstone:
   - large_dripstone
-  - Features.LARGE_DRIPSTONE
+  - Features.LARGE_DRIPSTONE_FEATURE
   - LargeDripstoneConfiguration
 lush_caves_clay:
   - lush_caves_clay
