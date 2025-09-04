@@ -150,6 +150,10 @@ end_gateway_delayed:
   - end_gateway_delayed
   - Features.END_GATEWAY_DELAYED
   - EndGatewayConfiguration
+end_gateway_return:
+  - end_gateway_delayed
+  - Features.END_GATEWAY_DELAYED
+  - EndGatewayConfiguration
 end_island:
   - end_island
   - Features.END_ISLAND
@@ -161,6 +165,10 @@ end_spike:
 fancy_oak:
   - fancy_oak
   - Features.FANCY_OAK
+  - TreeConfiguration
+fancy_oak_bees:
+  - fancy_oak_bees_0002
+  - Features.FANCY_OAK_BEES_0002
   - TreeConfiguration
 fancy_oak_bees_0002:
   - fancy_oak_bees_0002
@@ -310,6 +318,10 @@ moss_vegetation:
   - moss_vegetation
   - Features.MOSS_VEGETATION
   - SimpleBlockConfiguration
+mushroom_island_vegetation:
+  - mushroom_field_vegetation
+  - Features.MUSHROOM_FIELD_VEGETATION
+  - RandomBooleanFeatureConfiguration
 nether_sprouts:
   - nether_sprouts
   - Features.NETHER_SPROUTS
@@ -554,6 +566,10 @@ pine:
   - pine
   - Features.PINE
   - TreeConfiguration
+pointed_dripstone:
+  - large_dripstone
+  - Features.LARGE_DRIPSTONE_FEATURE
+  - LargeDripstoneConfiguration
 rooted_azalea_tree:
   - rooted_azalea_trees
   - Features.ROOTED_AZALEA_TREES
@@ -611,6 +627,10 @@ spring_water:
   - Features.SPRING_WATER
   - SpringConfiguration
 spruce:
+  - spruce
+  - Features.SPRUCE
+  - TreeConfiguration
+super_birch_bees:
   - spruce
   - Features.SPRUCE
   - TreeConfiguration
