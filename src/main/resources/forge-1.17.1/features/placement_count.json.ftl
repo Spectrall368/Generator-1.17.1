@@ -1,1 +1,1 @@
-.count(${input$count}.sample(context.random(), world))
+.count(${input$count})

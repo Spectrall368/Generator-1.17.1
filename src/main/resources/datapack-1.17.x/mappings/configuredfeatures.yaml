@@ -127,8 +127,8 @@ disk_clay:
   - Features.DISK_CLAY
   - DiskConfiguration
 disk_grass:
-  - disk_grass
-  - Features.PATCH_GRASS
+  - patch_grass_plain
+  - Features.PATCH_GRASS_PLAIN
   - RandomPatchConfiguration
 disk_gravel:
   - disk_gravel
@@ -144,7 +144,7 @@ dripleaf:
   - SimpleRandomFeatureConfiguration
 dripstone_cluster:
   - dripstone_cluster
-  - Features.DRIPSTONE_CLUSTER
+  - Features.DRIPSTONE_CLUSTER_FEATURE
   - DripstoneClusterConfiguration
 end_gateway_delayed:
   - end_gateway_delayed
@@ -191,9 +191,9 @@ flower_flower_forest:
   - Features.FLOWER_FLOWER_FOREST
   - NoiseProviderConfiguration
 flower_meadow:
-  - flower_meadow
-  - Features.FLOWER_MEADOW
-  - DualNoiseProviderConfiguration
+  - flower_flower_forest
+  - Features.FLOWER_FLOWER_FOREST
+  - NoiseProviderConfiguration
 flower_plain:
   - flower_plain
   - Features.FLOWER_PLAIN
@@ -392,7 +392,7 @@ ore_diamond_buried:
   - OreConfiguration
 ore_diamond_large:
   - ore_diamond_large
-  - Features.ORE_DIAMOND_LARGE
+  - Features.PROTOTYPE_ORE_DIAMOND_LARGE
   - OreConfiguration
 ore_diamond_small:
   - ore_diamond_small
@@ -598,10 +598,6 @@ seagrass_tall:
   - seagrass_tall
   - Features.SEAGRASS_TALL
   - ProbabilityFeatureConfiguration
-single_piece_of_grass:
-  - single_piece_of_grass
-  - Features.SINGLE_PIECE_OF_GRASS
-  - SimpleBlockConfiguration
 small_basalt_columns:
   - small_basalt_columns
   - Features.SMALL_BASALT_COLUMNS
@@ -624,11 +620,11 @@ spring_lava_overworld:
   - SpringConfiguration
 spring_nether_closed:
   - spring_nether_closed
-  - Features.SPRING_NETHER_CLOSED
+  - Features.SPRING_LAVA
   - SpringConfiguration
 spring_nether_open:
   - spring_nether_open
-  - Features.SPRING_NETHER_OPEN
+  - Features.SPRING_LAVA
   - SpringConfiguration
 spring_water:
   - spring_water
@@ -671,8 +667,8 @@ trees_old_growth_spruce_taiga:
   - Features.TREES_OLD_GROWTH_SPRUCE_TAIGA
   - RandomFeatureConfiguration
 trees_plains:
-  - trees_plains
-  - Features.TREES_PLAINS
+  - plain_vegetation
+  - Features.PLAIN_VEGETATION
   - RandomFeatureConfiguration
 trees_savanna:
   - trees_savanna
