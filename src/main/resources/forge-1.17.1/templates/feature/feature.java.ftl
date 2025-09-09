@@ -124,8 +124,8 @@ public class ${name}Feature extends ${generator.map(featuretype, "features")} {
 		</#if>
 
 		<#if data.hasPlacedFeature() && (hardcodedElements?size > 0)>
-            <#list hardcodedElements as elemento>
-            ${elemento}
+            <#list hardcodedElements as element>
+            ${element}
             </#list>
 		</#if>
 
