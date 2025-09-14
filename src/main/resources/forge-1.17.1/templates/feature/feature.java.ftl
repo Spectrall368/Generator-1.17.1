@@ -71,7 +71,6 @@ public class ${name}Feature extends ${generator.map(featuretype, "features")} {
 	}
 
 	public static Feature<?> feature() {
-		Random random = new Random();
 		FEATURE = new ${name}Feature();
 		CONFIGURED_FEATURE = <#if featuretype == "configured_feature_reference">${nonHardcodedConfiguration}<#else>FEATURE.configured(<#if nonHardcodedConfiguration == "">NoneFeatureConfiguration.INSTANCE<#else>${nonHardcodedConfiguration}</#if>)</#if><#if data.hasPlacedFeature()>${nonHardcodedPlacement}</#if>;
 
