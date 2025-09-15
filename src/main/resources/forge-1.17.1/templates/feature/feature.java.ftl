@@ -130,7 +130,7 @@ public class ${name}Feature extends ${generator.map(featuretype, "features")} {
 			return false;
 		</#if>
 
-		<#if data.hasPlacedFeature() && (allHardcodedElements?size > 0)>
+		<#if (allHardcodedElements?size > 0)>
             <#list allHardcodedElements as element>
             ${element}
             </#list>
