@@ -474,11 +474,11 @@ public class ${name}Block extends
 	</#if>
 
 	<#if data.strippingResult?? && !data.strippingResult.isEmpty()>
-	@Override public BlockState getToolModifiedState(BlockState blockstate, UseOnContext context, ToolAction itemAbility) {
-		if (ToolActions.AXE_STRIP == itemAbility && context.getItemInHand().canPerformAction(itemAbility)) {
+	@Override public BlockState getToolModifiedState(BlockState blockstate, Level world, BlockPos pos, Player player, ItemStack stack, ToolAction itemAbility) {
+		if (ToolActions.AXE_STRIP == itemAbility && stack.canPerformAction(itemAbility)) {
 			return ${mappedBlockToBlock(data.strippingResult)}.withPropertiesOf(blockstate);
 		}
-		return super.getToolModifiedState(blockstate, context, itemAbility);
+		return super.getToolModifiedState(blockstate, world, pos, player, stack, itemAbility);
 	}
 	</#if>
 
