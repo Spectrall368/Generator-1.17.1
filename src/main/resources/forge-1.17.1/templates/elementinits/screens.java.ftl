@@ -34,6 +34,8 @@
  */
 package ${package}.init;
 
+import java.text.DecimalFormat;
+
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT) public class ${JavaModName}Screens {
 
 	@SubscribeEvent public static void clientLoad(FMLClientSetupEvent event) {
@@ -62,7 +64,7 @@ package ${package}.init;
       private final DecimalFormat format;
 
       public ForgeSlider(int x, int y, int width, int height, Component prefix, Component suffix, double minValue, double maxValue, double currentValue, double stepSize, int precision, boolean drawString) {
-        super(x, y, width, height, TextComponent.EMPTY, 0 D);
+        super(x, y, width, height, TextComponent.EMPTY, 0D);
         this.prefix = prefix;
         this.suffix = suffix;
         this.minValue = minValue;
@@ -71,7 +73,7 @@ package ${package}.init;
         this.value = this.snapToNearest((currentValue - minValue) / (maxValue - minValue));
         this.drawString = drawString;
 
-        if (stepSize == 0 D) {
+        if (stepSize == 0D) {
           precision = Math.min(precision, 4);
 
           StringBuilder builder = new StringBuilder("0");
@@ -93,7 +95,7 @@ package ${package}.init;
       }
 
       public ForgeSlider(int x, int y, int width, int height, Component prefix, Component suffix, double minValue, double maxValue, double currentValue, boolean drawString) {
-        this(x, y, width, height, prefix, suffix, minValue, maxValue, currentValue, 1 D, 0, drawString);
+        this(x, y, width, height, prefix, suffix, minValue, maxValue, currentValue, 1D, 0, drawString);
       }
 
       public double getValue() {
@@ -134,8 +136,8 @@ package ${package}.init;
         if (flag || keyCode == GLFW.GLFW_KEY_RIGHT) {
           if (this.minValue > this.maxValue)
             flag = !flag;
-          float f = flag ? -1 F : 1 F;
-          if (stepSize <= 0 D)
+          float f = flag ? -1F : 1F;
+          if (stepSize <= 0D)
             this.setSliderValue(this.value + (f / (this.width - 8)));
           else
             this.setValue(this.getValue() + f * this.stepSize);
@@ -158,10 +160,10 @@ package ${package}.init;
       }
 
       private double snapToNearest(double value) {
-        if (stepSize <= 0 D)
-          return Mth.clamp(value, 0 D, 1 D);
+        if (stepSize <= 0D)
+          return Mth.clamp(value, 0D, 1D);
 
-        value = Mth.lerp(Mth.clamp(value, 0 D, 1 D), this.minValue, this.maxValue);
+        value = Mth.lerp(Mth.clamp(value, 0D, 1D), this.minValue, this.maxValue);
 
         value = (stepSize * Math.round(value / stepSize));
 
@@ -171,7 +173,7 @@ package ${package}.init;
           value = Mth.clamp(value, this.minValue, this.maxValue);
         }
 
-        return Mth.map(value, this.minValue, this.maxValue, 0 D, 1 D);
+        return Mth.map(value, this.minValue, this.maxValue, 0D, 1D);
       }
 
       @Override
