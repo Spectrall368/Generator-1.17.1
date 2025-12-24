@@ -1,7 +1,7 @@
 <#include "procedures.java.ftl">
 @Mod.EventBusSubscriber public class ${name}Procedure {
 	@SubscribeEvent public static void onUseHoe(UseHoeEvent event) {
-		<#assign dependenciesCode><#compress>
+		<#assign dependenciesCode>
 			<@procedureDependenciesCode dependencies, {
 			"x": "event.getContext().getClickedPos().getX()",
 			"y": "event.getContext().getClickedPos().getY()",
@@ -11,6 +11,6 @@
 			"blockstate": "event.getPlayer().level.getBlockState(event.getContext().getClickedPos())",
 			"event": "event"
 			}/>
-		</#compress></#assign>
+		</#assign>
 		execute(event<#if dependenciesCode?has_content>,</#if>${dependenciesCode});
 	}

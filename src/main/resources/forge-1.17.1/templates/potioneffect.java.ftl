@@ -33,7 +33,7 @@
 <#include "procedures.java.ftl">
 package ${package}.potion;
 
-<#compress>
+<@javacompress>
 public class ${name}MobEffect extends MobEffect {
 
 	public ${name}MobEffect() {
@@ -134,7 +134,7 @@ public class ${name}MobEffect extends MobEffect {
 	}
 	</#if>
 }
-</#compress>
+</@javacompress>
 <#-- @formatter:on -->
 <#function getAttributeOperation operation>
     <#if operation == "ADD_VALUE">

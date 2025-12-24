@@ -61,7 +61,7 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvi
 </#list>
 <#assign nonHardcodedConfiguration = configurationcode?replace(placementPattern, "", "r")>
 <#assign allHardcodedElements = placementHardcodedElements + configurationHardcodedElements>
-<#compress>
+<@javacompress>
 public class ${name}Feature extends ${generator.map(featuretype, "features")} {
 	private static ${name}Feature FEATURE = null;
 	private static ConfiguredFeature<?, ?> CONFIGURED_FEATURE = null;
@@ -139,7 +139,7 @@ public class ${name}Feature extends ${generator.map(featuretype, "features")} {
 		return super.place(<#if (allHardcodedElements?size > 0)>new FeaturePlaceContext<>(world, context.chunkGenerator(), context.random(), origin, context.config())<#else>context</#if>);
 	}
 	</#if>
-}</#compress>
+}</@javacompress>
 <#-- @formatter:on -->
 <#function expandBiomeTag biomeTag>
     <#local result = []>
