@@ -264,8 +264,8 @@
 
 <#macro onItemEntityDestroyed procedure="">
 <#if hasProcedure(procedure)>
-@Override public void onDestroyed(ItemEntity entity, DamageSource damagesource) {
-	super.onDestroyed(entity, damagesource);
+@Override public void onDestroyed(ItemEntity entity) {
+	super.onDestroyed(entity);
 	<@procedureCode procedure, {
 		"x": "entity.getX()",
 		"y": "entity.getY()",
@@ -273,7 +273,7 @@
 		"world": "entity.level",
 		"entity": "entity",
 		"itemstack": "entity.getItem()",
-		"damagesource": "damagesource"
+		"damagesource": "DamageSource.GENERIC"
 	}/>
 }
 </#if>

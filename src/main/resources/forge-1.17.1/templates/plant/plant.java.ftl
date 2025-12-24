@@ -192,11 +192,11 @@ public class ${name}Block extends ${getPlantClass(data.plantType)}Block
 	</#if>
 
 	<#if data.strippingResult?? && !data.strippingResult.isEmpty()>
-	@Override public BlockState getToolModifiedState(BlockState blockstate, UseOnContext context, ToolAction itemAbility, boolean simulate) {
+	@Override public BlockState getToolModifiedState(BlockState blockstate, UseOnContext context, ToolAction itemAbility) {
 		if (ToolActions.AXE_STRIP == itemAbility && context.getItemInHand().canPerformAction(itemAbility)) {
 			return ${mappedBlockToBlock(data.strippingResult)}.withPropertiesOf(blockstate);
 		}
-		return super.getToolModifiedState(blockstate, context, itemAbility, simulate);
+		return super.getToolModifiedState(blockstate, context, itemAbility);
 	}
 	</#if>
 
