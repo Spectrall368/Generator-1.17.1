@@ -478,7 +478,7 @@ public class ${name}Block extends
 		if (ToolActions.AXE_STRIP == itemAbility && context.getItemInHand().canPerformAction(itemAbility)) {
 			return ${mappedBlockToBlock(data.strippingResult)}.withPropertiesOf(blockstate);
 		}
-		return super.getToolModifiedState(blockstate, context, itemAbility, simulate);
+		return super.getToolModifiedState(blockstate, context, itemAbility);
 	}
 	</#if>
 
