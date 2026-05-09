@@ -93,7 +93,7 @@ package ${package}.client.gui;
 										if (<@procedureOBJToConditionCode component.displayCondition/>) {
 					</#if>
 					RenderSystem.setShaderTexture(0, IMAGE_${component?index});
-					Minecraft.getInstance().gui.blit(event.${stackMethodName}(), <@calculatePosition component/>, 0, 0,
+					Minecraft.getInstance().gui.blit(event.getMatrixStack(), <@calculatePosition component/>, 0, 0,
 					${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())},
 					${component.getWidth(w.getWorkspace())}, ${component.getHeight(w.getWorkspace())});
 					<#if hasProcedure(component.displayCondition)>}</#if>
