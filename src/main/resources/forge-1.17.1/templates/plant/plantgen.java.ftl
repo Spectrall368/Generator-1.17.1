@@ -65,12 +65,11 @@ public class ${name}Feature extends <#if data.plantType == "normal" && data.gene
         	<#if data.generationType == "Flower" || data.plantType == "growapable">
         	.rarity(32)</#if>
         	.squared()
-       		.decorated(Features.Decorators.
        		<#if data.generateAtAnyHeight>
-                FULL_RANGE
-        	<#else>
-                HEIGHTMAP<#if !(data.generationType == "Grass" || data.plantType == "growapable")>_WORLD_SURFACE</#if>
-            </#if>);
+       		.range(Features.Decorators.FULL_RANGE
+       		<#else>
+       		.decorated(Features.Decorators.HEIGHTMAP<#if !(data.generationType == "Grass" || data.plantType == "growapable")>_WORLD_SURFACE</#if>
+       		</#if>);
 
         Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, new ResourceLocation("${modid}:${registryname}"), CONFIGURED_FEATURE);
 		return INSTANCE;
