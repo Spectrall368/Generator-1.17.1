@@ -62,21 +62,21 @@ import org.apache.logging.log4j.Logger;
 	}
 
 	<#-- Wait procedure block support below -->
-	private static final Queue<IntObjectPair<Runnable>> workToBeScheduled = new ConcurrentLinkedQueue<>();
+	private static final Queue<Map.Entry<Integer, Runnable>> workToBeScheduled = new ConcurrentLinkedQueue<>();
 	private static final PriorityQueue<TickTask> workQueue = new PriorityQueue<>(Comparator.comparingInt(TickTask::getTick));
 
 	public static void queueServerWork(int delay, Runnable action) {
 		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER)
-			workToBeScheduled.add(new IntObjectImmutablePair<>(delay, action));
+			workToBeScheduled.add(new AbstractMap.SimpleEntry<>(delay, action));
 	}
 
 	@SubscribeEvent public void tick(TickEvent.ServerTickEvent event) {
 		if(event.phase == TickEvent.Phase.END) {
             int currentTick = ServerLifecycleHooks.getCurrentServer().getTickCount();
 
-            IntObjectPair<Runnable> work;
+            Map.Entry<Integer, Runnable> work;
             while ((work = workToBeScheduled.poll()) != null) {
-                workQueue.add(new TickTask(currentTick + work.leftInt(), work.right()));
+                workQueue.add(new TickTask(currentTick + work.getKey(), work.getValue()));
             }
 
             while (!workQueue.isEmpty() && currentTick >= workQueue.peek().getTick()) {

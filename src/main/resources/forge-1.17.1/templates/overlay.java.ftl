@@ -117,7 +117,7 @@ package ${package}.client.gui;
 						<#if hasProcedure(component.displayCondition)>
 						if (<@procedureOBJToConditionCode component.displayCondition/>)
 						</#if>
-						Minecraft.getInstance().font.draw<#if component.hasShadow>Shadow</#if>(event.${stackMethodName}(),
+						Minecraft.getInstance().font.draw<#if component.hasShadow>Shadow</#if>(event.getMatrixStack(),
 							<#if hasProcedure(component.text)><@procedureOBJToStringCode component.text/><#else>new TranslatableComponent("gui.${modid}.${registryname}.${component.getName()}")</#if>,
                     <@calculatePosition component/>, ${component.color.getRGB()});
             </#list>
