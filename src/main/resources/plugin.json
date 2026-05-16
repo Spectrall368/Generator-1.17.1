@@ -1,6 +1,7 @@
 {
   "id": "generator-${mcVersion}",
   "supportedversions": [${supportedVersion}],
+  "weight": 11,
   "info": {
     "name": "Forge ${mcVersion} Generator",
     "version": "${pluginVersion}",
