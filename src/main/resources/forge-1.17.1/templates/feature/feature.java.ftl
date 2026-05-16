@@ -122,18 +122,18 @@ public class ${name}Feature extends ${generator.map(featuretype, "features")} {
 			return false;
 		</#if>
 
+		<#if (allHardcodedElements?size > 0)>
+            <#list allHardcodedElements as element>
+            ${element}
+            </#list>
+		</#if>
+
 		<#if hasProcedure(data.generateCondition)>
 		int x = origin.getX();
 		int y = origin.getY();
 		int z = origin.getZ();
 		if (!<@procedureOBJToConditionCode data.generateCondition/>)
 			return false;
-		</#if>
-
-		<#if (allHardcodedElements?size > 0)>
-            <#list allHardcodedElements as element>
-            ${element}
-            </#list>
 		</#if>
 
 		return super.place(<#if (allHardcodedElements?size > 0)>new FeaturePlaceContext<>(world, context.chunkGenerator(), context.random(), origin, context.config())<#else>context</#if>);
